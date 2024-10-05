@@ -1,5 +1,5 @@
 {
-  "name": "quotes-api",
+  "name": "QuoteSlate",
   "version": "1.0.0",
   "description": "A simple Quotes API for Vercel with Postgres",
   "main": "index.js",
@@ -9,6 +9,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "pg": "^8.7.1",
-    "@vercel/postgres": "^0.3.0"
+    "@vercel/postgres": "^0.3.0",
+    "cors": "^2.8.5"
   }
 }
