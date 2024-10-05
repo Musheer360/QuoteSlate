@@ -3,14 +3,26 @@ const { sql } = require('@vercel/postgres');
 const app = express();
 
 // Helper function to get a random quote
-async function getRandomQuote(maxLength = 9999) {
+async function getRandomQuote(maxLength) {
   try {
-    const result = await sql`
-      SELECT * FROM quotes
-      WHERE LENGTH(quote) <= ${maxLength}
-      ORDER BY RANDOM()
-      LIMIT 1
-    `;
+    let result;
+    if (maxLength) {
+      // If maxLength is provided, apply the length filter
+      result = await sql`
+        SELECT * FROM quotes
+        WHERE LENGTH(quote) <= ${maxLength}
+        ORDER BY RANDOM()
+        LIMIT 1
+      `;
+    } else {
+      // If maxLength is not provided, select a random quote with no length filter
+      result = await sql`
+        SELECT * FROM quotes
+        ORDER BY RANDOM()
+        LIMIT 1
+      `;
+    }
+    
     return result.rows[0];
   } catch (error) {
     console.error('Database query error:', error);
@@ -20,39 +32,16 @@ async function getRandomQuote(maxLength = 9999) {
 
 // API route for random quotes
 app.get('/api/quotes/random', async (req, res) => {
-  const maxLength = req.query.maxLength ? parseInt(req.query.maxLength) : 9999;
+  // Check if maxLength query parameter is provided
+  const maxLength = req.query.maxLength ? parseInt(req.query.maxLength) : null;
+  
+  // Fetch a random quote
   const quote = await getRandomQuote(maxLength);
   
   if (quote) {
     res.json(quote);
   } else {
     res.status(404).json({ error: "No quotes found matching the criteria." });
-  }
-});
-
-// Health check route to test database connectivity
-app.get('/api/health-check', async (req, res) => {
-  try {
-    const result = await sql`SELECT 1 AS connected`;
-    if (result.rows.length > 0) {
-      res.json({ message: 'Database connection is successful!' });
-    } else {
-      res.status(500).json({ error: 'Database connection failed.' });
-    }
-  } catch (error) {
-    console.error('Database connection error:', error);
-    res.status(500).json({ error: 'Database connection error' });
-  }
-});
-
-// Route to fetch all quotes (for testing purposes)
-app.get('/api/quotes/all', async (req, res) => {
-  try {
-    const result = await sql`SELECT * FROM quotes LIMIT 10`;
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Database query error:', error);
-    res.status(500).json({ error: 'Database query failed.' });
   }
 });
 
