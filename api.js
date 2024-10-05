@@ -1,6 +1,10 @@
 const express = require('express');
+const cors = require('cors');  // Import the CORS package
 const { sql } = require('@vercel/postgres');
 const app = express();
+
+// Enable CORS for all routes
+app.use(cors());
 
 // Helper function to get a random quote
 async function getRandomQuote(maxLength) {
