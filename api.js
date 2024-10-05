@@ -45,6 +45,17 @@ app.get('/api/health-check', async (req, res) => {
   }
 });
 
+// Route to fetch all quotes (for testing purposes)
+app.get('/api/quotes/all', async (req, res) => {
+  try {
+    const result = await sql`SELECT * FROM quotes LIMIT 10`;
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Database query error:', error);
+    res.status(500).json({ error: 'Database query failed.' });
+  }
+});
+
 // Default route
 app.get('/', (req, res) => {
   res.send('Welcome to the Quotes API! Use /api/quotes/random to get a random quote.');
