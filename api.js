@@ -51,7 +51,13 @@ app.get('/api/quotes/random', async (req, res) => {
 
 // Default route
 app.get('/', (req, res) => {
-  res.send('Welcome to the Quotes API! Use /api/quotes/random to get a random quote.');
+  res.send(`
+    Welcome to QuoteSlate API by Musheer360!<br>
+    Use <code>/api/quotes/random</code> to get a random quote.<br>
+    Add <code>?maxLength={character_count}</code> to fetch a quote of a specific length by replacing <code>{character_count}</code> with the desired character count.<br>
+    Example: <a href="https://quoteslate.vercel.app/api/quotes/random?maxLength=50" target="_blank">
+    quoteslate.vercel.app/api/quotes/random?maxLength=50</a>
+  `);
 });
 
 module.exports = app;
