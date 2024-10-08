@@ -55,7 +55,7 @@ async function getQuote({ maxLength = null, minLength = null } = {}) {
 app.get('/api/quotes/random', async (req, res) => {
   const maxLength = req.query.maxLength ? parseInt(req.query.maxLength) : null;
   const minLength = req.query.minLength ? parseInt(req.query.minLength) : null;
-  
+
   const quote = await getQuote({ maxLength, minLength });
 
   if (quote) {
@@ -88,123 +88,281 @@ app.get('/api/quotes/range', async (req, res) => {
 app.get('/', (req, res) => {
   res.send(`
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head>
-        <title>QuoteSlate API by Musheer360</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>QuoteSlate API | Musheer360</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
         <style>
+            :root {
+                --primary-color: #4a90e2;
+                --secondary-color: #f39c12;
+                --background-color: #f4f7f9;
+                --text-color: #333;
+                --card-bg: #ffffff;
+            }
             body {
-                font-family: 'Arial', sans-serif;
-                background-color: #f7f9fc;
-                color: #333;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background-color: var(--background-color);
+                color: var(--text-color);
+                line-height: 1.6;
                 margin: 0;
                 padding: 0;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
             }
             .container {
-                width: 60%;
-                max-width: 900px;
-                background-color: #ffffff;
-                padding: 40px;
-                border-radius: 10px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 2rem;
+            }
+            header {
+                background-color: var(--primary-color);
+                color: white;
+                text-align: center;
+                padding: 2rem 0;
+                margin-bottom: 2rem;
             }
             h1 {
-                font-size: 2.2rem;
-                color: #0056b3;
-                margin-bottom: 20px;
-                text-align: center;
+                font-size: 2.5rem;
+                margin-bottom: 0.5rem;
+            }
+            .subtitle {
+                font-size: 1.2rem;
+                opacity: 0.8;
+            }
+            .card {
+                background-color: var(--card-bg);
+                border-radius: 8px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                padding: 1.5rem;
+                margin-bottom: 2rem;
             }
             h2 {
-                font-size: 1.5rem;
-                margin-top: 30px;
-                color: #444;
-                border-bottom: 2px solid #0056b3;
-                padding-bottom: 5px;
-            }
-            p, li {
-                font-size: 1rem;
-                line-height: 1.6;
-                margin-bottom: 10px;
-            }
-            ul {
-                padding-left: 20px;
-            }
-            code {
-                background-color: #f3f4f6;
-                padding: 4px 6px;
-                border-radius: 5px;
-                font-size: 0.95rem;
-                color: #d63384;
+                color: var(--primary-color);
+                border-bottom: 2px solid var(--secondary-color);
+                padding-bottom: 0.5rem;
             }
             .endpoint {
-                display: inline-block;
-                margin: 8px 0;
-                background: #e7f1ff;
-                padding: 8px 16px;
-                border: 1px solid #b0d1ff;
-                border-radius: 5px;
-                text-decoration: none;
-                color: #0056b3;
-                font-weight: bold;
-                transition: 0.3s;
+                background-color: #e3f2fd;
+                border-left: 4px solid var(--primary-color);
+                padding: 1rem;
+                margin-bottom: 1rem;
+                border-radius: 4px;
             }
-            .endpoint:hover {
-                background: #cfe2ff;
-                color: #00409e;
+            .endpoint h3 {
+                margin-top: 0;
+                color: var(--primary-color);
+            }
+            .endpoint p {
+                margin-bottom: 0.5rem;
+            }
+            .try-it-container {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                margin-top: 1rem;
+            }
+            .try-it {
+                display: inline-block;
+                background-color: var(--secondary-color);
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 4px;
+                text-decoration: none;
+                transition: background-color 0.3s ease;
+                cursor: pointer;
+                border: none;
+                font-size: 1rem;
+            }
+            .try-it:hover {
+                background-color: #e67e22;
+            }
+            .try-it:disabled {
+                background-color: #ccc;
+                cursor: not-allowed;
+            }
+            .param-input {
+                padding: 0.5rem;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-size: 1rem;
+            }
+            .response-area {
+                background-color: #2d2d2d;
+                border-radius: 4px;
+                padding: 1rem;
+                margin-top: 1rem;
+                display: none;
+            }
+            .response-area pre {
+                margin: 0;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+            }
+            .loading {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border: 3px solid rgba(255,255,255,.3);
+                border-radius: 50%;
+                border-top-color: #fff;
+                animation: spin 1s ease-in-out infinite;
+                margin-left: 10px;
+            }
+            @keyframes spin {
+                to { transform: rotate(360deg); }
             }
             footer {
                 text-align: center;
-                margin-top: 30px;
-                font-size: 0.9rem;
-                color: #555;
+                margin-top: 2rem;
+                padding: 1rem 0;
+                background-color: var(--primary-color);
+                color: white;
             }
             footer a {
-                color: #d63384;
+                color: white;
                 text-decoration: none;
                 font-weight: bold;
             }
             footer a:hover {
                 text-decoration: underline;
             }
+            @media (max-width: 768px) {
+                .container {
+                    padding: 1rem;
+                }
+                .try-it-container {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+            }
         </style>
     </head>
     <body>
+        <header>
+            <h1>QuoteSlate API</h1>
+            <p class="subtitle">Discover inspiring quotes with ease</p>
+        </header>
+
         <div class="container">
-            <h1>Welcome to QuoteSlate API by Musheer360!</h1>
-            <p>This API allows you to retrieve random quotes and filter them based on their length. Explore the available endpoints and parameters below to make full use of the API.</p>
-            
-            <h2>API Endpoints</h2>
-            <p>Use the following endpoints to fetch quotes:</p>
-            <ul>
-                <li><code>GET /api/quotes/random</code> - Retrieves a random quote.</li>
-                <li><code>GET /api/quotes/random?maxLength={number}</code> - Retrieves a random quote with a maximum character length.</li>
-                <li><code>GET /api/quotes/random?minLength={number}</code> - Retrieves a random quote with a minimum character length.</li>
-                <li><code>GET /api/quotes/range?minLength={number}&maxLength={number}</code> - Retrieves a random quote within the specified length range.</li>
-            </ul>
+            <div class="card">
+                <h2>About QuoteSlate</h2>
+                <p>QuoteSlate is a powerful API that provides access to a vast collection of inspirational quotes. Whether you're building a motivational app, a writing tool, or just looking for daily inspiration, QuoteSlate has got you covered!</p>
+            </div>
 
-            <h2>Parameters</h2>
-            <p>You can use the following query parameters to filter quotes based on length:</p>
-            <ul>
-                <li><code>maxLength</code> - Integer value specifying the maximum length of the quote.</li>
-                <li><code>minLength</code> - Integer value specifying the minimum length of the quote.</li>
-            </ul>
+            <div class="card">
+                <h2>API Endpoints</h2>
 
-            <h2>Examples</h2>
-            <p>Here are some example queries you can try:</p>
-            <ul>
-                <li><a href="/api/quotes/random" class="endpoint">Get a Random Quote</a></li>
-                <li><a href="/api/quotes/random?maxLength=50" class="endpoint">Get a Random Quote with Max Length of 50</a></li>
-                <li><a href="/api/quotes/random?minLength=100" class="endpoint">Get a Random Quote with Min Length of 100</a></li>
-                <li><a href="/api/quotes/range?minLength=50&maxLength=150" class="endpoint">Get a Random Quote within Length Range 50-150</a></li>
-            </ul>
+                <div class="endpoint">
+                    <h3>Get a Random Quote</h3>
+                    <p>Retrieve a random quote from our collection.</p>
+                    <code>GET /api/quotes/random</code>
+                    <div class="try-it-container">
+                        <button class="try-it" data-endpoint="/api/quotes/random">Try it</button>
+                        <span class="loading" style="display: none;"></span>
+                    </div>
+                    <div class="response-area">
+                        <pre><code class="language-json"></code></pre>
+                    </div>
+                </div>
 
-            <footer>
-                Made with ❤️ by <a href="https://github.com/Musheer360" target="_blank">Musheer360</a>
-            </footer>
+                <div class="endpoint">
+                    <h3>Get a Random Quote by Maximum Length</h3>
+                    <p>Retrieve a random quote with a maximum character length.</p>
+                    <code>GET /api/quotes/random?maxLength=50</code>
+                    <div class="try-it-container">
+                        <input type="number" class="param-input" placeholder="Max Length" min="1" value="50">
+                        <button class="try-it" data-endpoint="/api/quotes/random?maxLength=">Try it</button>
+                        <span class="loading" style="display: none;"></span>
+                    </div>
+                    <div class="response-area">
+                        <pre><code class="language-json"></code></pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <h3>Get a Random Quote by Minimum Length</h3>
+                    <p>Retrieve a random quote with a minimum character length.</p>
+                    <code>GET /api/quotes/random?minLength=100</code>
+                    <div class="try-it-container">
+                        <input type="number" class="param-input" placeholder="Min Length" min="1" value="100">
+                        <button class="try-it" data-endpoint="/api/quotes/random?minLength=">Try it</button>
+                        <span class="loading" style="display: none;"></span>
+                    </div>
+                    <div class="response-area">
+                        <pre><code class="language-json"></code></pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <h3>Get a Random Quote by Length Range</h3>
+                    <p>Retrieve a random quote within a specific character length range.</p>
+                    <code>GET /api/quotes/range?minLength=50&maxLength=150</code>
+                    <div class="try-it-container">
+                        <input type="number" class="param-input" placeholder="Min Length" min="1" value="50">
+                        <input type="number" class="param-input" placeholder="Max Length" min="1" value="150">
+                        <button class="try-it" data-endpoint="/api/quotes/range?minLength=&maxLength=">Try it</button>
+                        <span class="loading" style="display: none;"></span>
+                    </div>
+                    <div class="response-area">
+                        <pre><code class="language-json"></code></pre>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <footer>
+            <p>Created with ❤️ by <a href="https://github.com/Musheer360" target="_blank">Musheer360</a></p>
+        </footer>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const tryButtons = document.querySelectorAll('.try-it');
+
+                tryButtons.forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        const endpoint = button.getAttribute('data-endpoint');
+                        const container = button.closest('.endpoint');
+                        const responseArea = container.querySelector('.response-area');
+                        const codeElement = responseArea.querySelector('code');
+                        const loadingSpinner = container.querySelector('.loading');
+
+                        // Disable button and show loading spinner
+                        button.disabled = true;
+                        loadingSpinner.style.display = 'inline-block';
+
+                        let url = endpoint;
+
+                        // Handle inputs for endpoints with parameters
+                        const inputs = container.querySelectorAll('.param-input');
+                        inputs.forEach((input, index) => {
+                            if (index === 0) {
+                                url += input.value;
+                            } else {
+                                url += '&' + url.split('&')[1].split('=')[0] + '=' + input.value;
+                            }
+                        });
+
+                        try {
+                            const response = await fetch(url);
+                            const data = await response.json();
+                            codeElement.textContent = JSON.stringify(data, null, 2);
+                            Prism.highlightElement(codeElement);
+                            responseArea.style.display = 'block';
+                        } catch (error) {
+                            codeElement.textContent = `Error: ${error.message}`;
+                            responseArea.style.display = 'block';
+                        } finally {
+                            // Re-enable button and hide loading spinner
+                            button.disabled = false;
+                            loadingSpinner.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        </script>
     </body>
     </html>
   `);
