@@ -1,6 +1,6 @@
-const express = require('express');
-const cors = require('cors');
-const { sql } = require('@vercel/postgres');
+const express = require("express");
+const cors = require("cors");
+const { sql } = require("@vercel/postgres");
 const app = express();
 
 // Enable CORS for all routes
@@ -46,16 +46,16 @@ async function getQuote({ maxLength = null, minLength = null } = {}) {
 
     return result.rows[0];
   } catch (error) {
-    console.error('Database query error:', error);
+    console.error("Database query error:", error);
     return null;
   }
 }
 
 // API route for random quotes with different length options
-app.get('/api/quotes/random', async (req, res) => {
+app.get("/api/quotes/random", async (req, res) => {
   const maxLength = req.query.maxLength ? parseInt(req.query.maxLength) : null;
   const minLength = req.query.minLength ? parseInt(req.query.minLength) : null;
-  
+
   const quote = await getQuote({ maxLength, minLength });
 
   if (quote) {
@@ -66,13 +66,15 @@ app.get('/api/quotes/random', async (req, res) => {
 });
 
 // API route for getting quotes within a specific length range
-app.get('/api/quotes/range', async (req, res) => {
+app.get("/api/quotes/range", async (req, res) => {
   const minLength = req.query.minLength ? parseInt(req.query.minLength) : null;
   const maxLength = req.query.maxLength ? parseInt(req.query.maxLength) : null;
 
   // Both minLength and maxLength must be provided
   if (minLength === null || maxLength === null) {
-    return res.status(400).json({ error: "Both minLength and maxLength must be provided." });
+    return res
+      .status(400)
+      .json({ error: "Both minLength and maxLength must be provided." });
   }
 
   const quote = await getQuote({ minLength, maxLength });
@@ -85,7 +87,7 @@ app.get('/api/quotes/range', async (req, res) => {
 });
 
 // Improved Home Page
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
   res.send(`
 <!DOCTYPE html>
 <html lang="en">
@@ -244,16 +246,16 @@ app.get('/', (req, res) => {
         <h1>QuoteSlate API</h1>
         <p class="subtitle">Discover inspiring quotes with ease</p>
     </header>
-    
+
     <div class="container">
         <div class="card">
             <h2>About QuoteSlate</h2>
             <p>QuoteSlate is a powerful API that provides access to a vast collection of inspirational quotes. Whether you're building a motivational app, a writing tool, or just looking for daily inspiration, QuoteSlate has got you covered!</p>
         </div>
-        
+
         <div class="card">
             <h2>API Endpoints</h2>
-            
+
             <div class="endpoint">
                 <h3>Get a Random Quote</h3>
                 <p>Retrieve a random quote from our collection.</p>
@@ -266,7 +268,7 @@ app.get('/', (req, res) => {
                     <pre><code class="language-json"></code></pre>
                 </div>
             </div>
-            
+
             <div class="endpoint">
                 <h3>Get a Random Quote by Maximum Length</h3>
                 <p>Retrieve a random quote with a maximum character length.</p>
@@ -280,7 +282,7 @@ app.get('/', (req, res) => {
                     <pre><code class="language-json"></code></pre>
                 </div>
             </div>
-            
+
             <div class="endpoint">
                 <h3>Get a Random Quote by Minimum Length</h3>
                 <p>Retrieve a random quote with a minimum character length.</p>
@@ -294,7 +296,7 @@ app.get('/', (req, res) => {
                     <pre><code class="language-json"></code></pre>
                 </div>
             </div>
-            
+
             <div class="endpoint">
                 <h3>Get a Random Quote by Length Range</h3>
                 <p>Retrieve a random quote within a specific character length range.</p>
@@ -319,7 +321,7 @@ app.get('/', (req, res) => {
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const tryButtons = document.querySelectorAll('.try-it');
-            
+
             tryButtons.forEach(button => {
                 button.addEventListener('click', async (e) => {
                     e.preventDefault();
@@ -328,21 +330,23 @@ app.get('/', (req, res) => {
                     const responseArea = container.querySelector('.response-area');
                     const codeElement = responseArea.querySelector('code');
                     const loadingSpinner = container.querySelector('.loading');
-                    
+
                     // Disable button and show loading spinner
                     button.disabled = true;
                     loadingSpinner.style.display = 'inline-block';
-                    
+
                     let url = endpoint;
-                    
+
                     // Handle inputs for endpoints with parameters
                     const inputs = container.querySelectorAll('.param-input');
                     if (inputs.length === 1) {
                         url += inputs[0].value;
                     } else if (inputs.length === 2) {
-                        url += \`\${inputs[0].value}&maxLength=\${inputs[1].value}\`;
+                        // Fix: Use the correct parameter names for both inputs
+                        const paramNames = url.includes('range') ? ['minLength', 'maxLength'] : ['minLength', 'maxLength'];
+                        url = `${url}${paramNames[0]}=${inputs[0].value}&${paramNames[1]}=${inputs[1].value}`;
                     }
-                    
+
                     try {
                         const response = await fetch(url);
                         const data = await response.json();
@@ -350,7 +354,7 @@ app.get('/', (req, res) => {
                         Prism.highlightElement(codeElement);
                         responseArea.style.display = 'block';
                     } catch (error) {
-                        codeElement.textContent = \`Error: \${error.message}\`;
+                        codeElement.textContent = `Error: ${error.message}`;
                         responseArea.style.display = 'block';
                     } finally {
                         // Re-enable button and hide loading spinner
