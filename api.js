@@ -338,15 +338,9 @@ app.get('/', (req, res) => {
                     // Handle inputs for endpoints with parameters
                     const inputs = container.querySelectorAll('.param-input');
                     if (inputs.length === 1) {
-                    // Check if it's the minLength or maxLength input
-                    const minLength = inputs[0].value;
-                    if (minLength) {
-                      url += `?minLength=${minLength}`;
-                    }
+                        url += inputs[0].value;
                     } else if (inputs.length === 2) {
-                      const minLength = inputs[0].value;
-                      const maxLength = inputs[1].value;
-                      url += `?minLength=${minLength}&maxLength=${maxLength}`;
+                        url += \`\${inputs[0].value}&maxLength=\${inputs[1].value}\`;
                     }
                     
                     try {
