@@ -337,13 +337,13 @@ app.get('/', (req, res) => {
                     
                     // Handle inputs for endpoints with parameters
                     const inputs = container.querySelectorAll('.param-input');
-                    inputs.forEach((input, index) => {
-                        if (index === 0) {
-                            url += input.value;
-                        } else {
-                            url += '&' + url.split('&')[1].split('=')[0] + '=' + input.value;
-                        }
-                    });
+                    if (inputs.length > 0) {
+                        url = url.split('?')[0] + '?'; // Reset the URL to remove any existing query parameters
+                        inputs.forEach((input, index) => {
+                            if (index > 0) url += '&';
+                            url += input.getAttribute('placeholder').toLowerCase().replace(' ', '') + '=' + input.value;
+                        });
+                    }
                     
                     try {
                         const response = await fetch(url);
