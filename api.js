@@ -1,5 +1,5 @@
 const express = require('express');
-const cors = require('cors');  // Import the CORS package
+const cors = require('cors'); // Import the CORS package
 const { sql } = require('@vercel/postgres');
 const app = express();
 
@@ -11,10 +11,10 @@ async function getRandomQuote(maxLength) {
   try {
     let result;
     if (maxLength) {
-      // If maxLength is provided, apply the length filter
+      // Use the 'length' column instead of recalculating LENGTH(quote)
       result = await sql`
         SELECT * FROM quotes
-        WHERE LENGTH(quote) <= ${maxLength}
+        WHERE length <= ${maxLength}
         ORDER BY RANDOM()
         LIMIT 1
       `;
@@ -55,7 +55,7 @@ app.get('/', (req, res) => {
     Welcome to QuoteSlate API by Musheer360!<br>
     Use <code>/api/quotes/random</code> to get a random quote.<br>
     Add <code>?maxLength={character_count}</code> to fetch a quote of a specific length by replacing <code>{character_count}</code> with the desired character count.<br>
-    Example: <a href="https://quoteslate.vercel.app/api/quotes/random?maxLength=50" target="_blank">
+    Example: <a href="https://quoteslate.vercel.app/api/quotes/random" target="_blank">
     quoteslate.vercel.app/api/quotes/random?maxLength=50</a>
   `);
 });
