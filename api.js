@@ -337,12 +337,10 @@ app.get('/', (req, res) => {
                     
                     // Handle inputs for endpoints with parameters
                     const inputs = container.querySelectorAll('.param-input');
-                    if (inputs.length > 0) {
-                        url = url.split('?')[0] + '?'; // Reset the URL to remove any existing query parameters
-                        inputs.forEach((input, index) => {
-                            if (index > 0) url += '&';
-                            url += input.getAttribute('placeholder').toLowerCase().replace(' ', '') + '=' + input.value;
-                        });
+                    if (inputs.length === 1) {
+                        url += inputs[0].value;
+                    } else if (inputs.length === 2) {
+                        url += \`\${inputs[0].value}&maxLength=\${inputs[1].value}\`;
                     }
                     
                     try {
