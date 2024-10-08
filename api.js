@@ -93,55 +93,76 @@ app.get('/', (req, res) => {
         <title>QuoteSlate API by Musheer360</title>
         <style>
             body {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background: linear-gradient(120deg, #f6d365 0%, #fda085 100%);
+                font-family: 'Arial', sans-serif;
+                background-color: #f7f9fc;
                 color: #333;
                 margin: 0;
                 padding: 0;
                 display: flex;
-                align-items: center;
                 justify-content: center;
+                align-items: center;
                 height: 100vh;
             }
             .container {
-                max-width: 800px;
-                background: #ffffffdd;
-                padding: 30px;
-                border-radius: 16px;
-                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-                text-align: center;
+                width: 60%;
+                max-width: 900px;
+                background-color: #ffffff;
+                padding: 40px;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             }
             h1 {
-                font-size: 2.5rem;
+                font-size: 2.2rem;
                 color: #0056b3;
                 margin-bottom: 20px;
+                text-align: center;
             }
-            p {
-                font-size: 1.2rem;
-                margin-bottom: 20px;
+            h2 {
+                font-size: 1.5rem;
+                margin-top: 30px;
+                color: #444;
+                border-bottom: 2px solid #0056b3;
+                padding-bottom: 5px;
+            }
+            p, li {
+                font-size: 1rem;
+                line-height: 1.6;
+                margin-bottom: 10px;
+            }
+            ul {
+                padding-left: 20px;
+            }
+            code {
+                background-color: #f3f4f6;
+                padding: 4px 6px;
+                border-radius: 5px;
+                font-size: 0.95rem;
+                color: #d63384;
             }
             .endpoint {
-                display: block;
-                background: #e3f2fd;
-                padding: 10px 20px;
-                border-radius: 8px;
-                border: 1px solid #90caf9;
-                margin: 10px 0;
+                display: inline-block;
+                margin: 8px 0;
+                background: #e7f1ff;
+                padding: 8px 16px;
+                border: 1px solid #b0d1ff;
+                border-radius: 5px;
                 text-decoration: none;
-                color: #1e88e5;
+                color: #0056b3;
                 font-weight: bold;
                 transition: 0.3s;
             }
             .endpoint:hover {
-                background: #bbdefb;
-                color: #0d47a1;
+                background: #cfe2ff;
+                color: #00409e;
             }
             footer {
+                text-align: center;
                 margin-top: 30px;
                 font-size: 0.9rem;
+                color: #555;
             }
             footer a {
-                color: #0056b3;
+                color: #d63384;
                 text-decoration: none;
                 font-weight: bold;
             }
@@ -153,13 +174,36 @@ app.get('/', (req, res) => {
     <body>
         <div class="container">
             <h1>Welcome to QuoteSlate API by Musheer360!</h1>
-            <p>Explore various endpoints to get random quotes based on different criteria:</p>
-            <a href="/api/quotes/random" class="endpoint">Get a Random Quote</a>
-            <a href="/api/quotes/random?maxLength=50" class="endpoint">Get a Random Quote by Maximum Length</a>
-            <a href="/api/quotes/random?minLength=100" class="endpoint">Get a Random Quote by Minimum Length</a>
-            <a href="/api/quotes/range?minLength=50&maxLength=150" class="endpoint">Get a Random Quote by Length Range</a>
-            <p>Use the <code>minLength</code> and <code>maxLength</code> query parameters to specify length limits as needed.</p>
-            <footer>Created by <a href="https://github.com/Musheer360">Musheer360</a></footer>
+            <p>This API allows you to retrieve random quotes and filter them based on their length. Explore the available endpoints and parameters below to make full use of the API.</p>
+            
+            <h2>API Endpoints</h2>
+            <p>Use the following endpoints to fetch quotes:</p>
+            <ul>
+                <li><code>GET /api/quotes/random</code> - Retrieves a random quote.</li>
+                <li><code>GET /api/quotes/random?maxLength={number}</code> - Retrieves a random quote with a maximum character length.</li>
+                <li><code>GET /api/quotes/random?minLength={number}</code> - Retrieves a random quote with a minimum character length.</li>
+                <li><code>GET /api/quotes/range?minLength={number}&maxLength={number}</code> - Retrieves a random quote within the specified length range.</li>
+            </ul>
+
+            <h2>Parameters</h2>
+            <p>You can use the following query parameters to filter quotes based on length:</p>
+            <ul>
+                <li><code>maxLength</code> - Integer value specifying the maximum length of the quote.</li>
+                <li><code>minLength</code> - Integer value specifying the minimum length of the quote.</li>
+            </ul>
+
+            <h2>Examples</h2>
+            <p>Here are some example queries you can try:</p>
+            <ul>
+                <li><a href="/api/quotes/random" class="endpoint">Get a Random Quote</a></li>
+                <li><a href="/api/quotes/random?maxLength=50" class="endpoint">Get a Random Quote with Max Length of 50</a></li>
+                <li><a href="/api/quotes/random?minLength=100" class="endpoint">Get a Random Quote with Min Length of 100</a></li>
+                <li><a href="/api/quotes/range?minLength=50&maxLength=150" class="endpoint">Get a Random Quote within Length Range 50-150</a></li>
+            </ul>
+
+            <footer>
+                Made with ❤️ by <a href="https://github.com/Musheer360" target="_blank">Musheer360</a>
+            </footer>
         </div>
     </body>
     </html>
