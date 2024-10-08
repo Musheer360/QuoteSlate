@@ -87,65 +87,81 @@ app.get('/api/quotes/range', async (req, res) => {
 // Improved Home Page
 app.get('/', (req, res) => {
   res.send(`
+    <!DOCTYPE html>
     <html>
-      <head>
+    <head>
         <title>QuoteSlate API by Musheer360</title>
         <style>
-          body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            padding: 20px;
-            color: #333;
-          }
-          h1 {
-            text-align: center;
-            color: #0056b3;
-          }
-          .container {
-            max-width: 800px;
-            margin: auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-          }
-          ul {
-            list-style-type: none;
-            padding: 0;
-          }
-          li {
-            margin: 10px 0;
-          }
-          a {
-            text-decoration: none;
-            color: #0056b3;
-          }
-          .endpoint {
-            background: #e9f5ff;
-            padding: 10px;
-            border: 1px solid #d3e7fd;
-            border-radius: 4px;
-          }
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(120deg, #f6d365 0%, #fda085 100%);
+                color: #333;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+            }
+            .container {
+                max-width: 800px;
+                background: #ffffffdd;
+                padding: 30px;
+                border-radius: 16px;
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+                text-align: center;
+            }
+            h1 {
+                font-size: 2.5rem;
+                color: #0056b3;
+                margin-bottom: 20px;
+            }
+            p {
+                font-size: 1.2rem;
+                margin-bottom: 20px;
+            }
+            .endpoint {
+                display: block;
+                background: #e3f2fd;
+                padding: 10px 20px;
+                border-radius: 8px;
+                border: 1px solid #90caf9;
+                margin: 10px 0;
+                text-decoration: none;
+                color: #1e88e5;
+                font-weight: bold;
+                transition: 0.3s;
+            }
+            .endpoint:hover {
+                background: #bbdefb;
+                color: #0d47a1;
+            }
+            footer {
+                margin-top: 30px;
+                font-size: 0.9rem;
+            }
+            footer a {
+                color: #0056b3;
+                text-decoration: none;
+                font-weight: bold;
+            }
+            footer a:hover {
+                text-decoration: underline;
+            }
         </style>
-      </head>
-      <body>
+    </head>
+    <body>
         <div class="container">
-          <h1>Welcome to QuoteSlate API by Musheer360!</h1>
-          <p>Explore various endpoints to get random quotes based on different criteria.</p>
-          <ul>
-            <li><b>Get a Random Quote:</b> <br>
-              <span class="endpoint">/api/quotes/random</span></li>
-            <li><b>Get a Random Quote by Maximum Length:</b> <br>
-              <span class="endpoint">/api/quotes/random?maxLength=50</span></li>
-            <li><b>Get a Random Quote by Minimum Length:</b> <br>
-              <span class="endpoint">/api/quotes/random?minLength=100</span></li>
-            <li><b>Get a Random Quote by Length Range:</b> <br>
-              <span class="endpoint">/api/quotes/range?minLength=50&maxLength=150</span></li>
-          </ul>
-          <p>Use the <code>minLength</code> and <code>maxLength</code> query parameters to specify length limits as needed.</p>
-          <footer style="text-align: center; margin-top: 20px;">Created by <a href="https://github.com/Musheer360">Musheer360</a></footer>
+            <h1>Welcome to QuoteSlate API by Musheer360!</h1>
+            <p>Explore various endpoints to get random quotes based on different criteria:</p>
+            <a href="/api/quotes/random" class="endpoint">Get a Random Quote</a>
+            <a href="/api/quotes/random?maxLength=50" class="endpoint">Get a Random Quote by Maximum Length</a>
+            <a href="/api/quotes/random?minLength=100" class="endpoint">Get a Random Quote by Minimum Length</a>
+            <a href="/api/quotes/range?minLength=50&maxLength=150" class="endpoint">Get a Random Quote by Length Range</a>
+            <p>Use the <code>minLength</code> and <code>maxLength</code> query parameters to specify length limits as needed.</p>
+            <footer>Created by <a href="https://github.com/Musheer360">Musheer360</a></footer>
         </div>
-      </body>
+    </body>
     </html>
   `);
 });
