@@ -10,7 +10,7 @@ app.use(cors());
 async function getQuote({ maxLength = null, minLength = null } = {}) {
   try {
     let result;
-
+    
     if (minLength && maxLength) {
       // If both minLength and maxLength are provided, get quotes within the range
       result = await sql`
@@ -43,7 +43,7 @@ async function getQuote({ maxLength = null, minLength = null } = {}) {
         LIMIT 1
       `;
     }
-
+    
     return result.rows[0];
   } catch (error) {
     console.error('Database query error:', error);
@@ -57,7 +57,7 @@ app.get('/api/quotes/random', async (req, res) => {
   const minLength = req.query.minLength ? parseInt(req.query.minLength) : null;
   
   const quote = await getQuote({ maxLength, minLength });
-
+  
   if (quote) {
     res.json(quote);
   } else {
@@ -76,7 +76,7 @@ app.get('/api/quotes/range', async (req, res) => {
   }
 
   const quote = await getQuote({ minLength, maxLength });
-
+  
   if (quote) {
     res.json(quote);
   } else {
@@ -302,7 +302,7 @@ app.get('/', (req, res) => {
                 <div class="try-it-container">
                     <input type="number" class="param-input" placeholder="Min Length" min="1" value="50">
                     <input type="number" class="param-input" placeholder="Max Length" min="1" value="150">
-                    <button class="try-it" data-endpoint="/api/quotes/range?minLength=&maxLength=">Try it</button>
+                    <button class="try-it" data-endpoint="/api/quotes/range">Try it</button>
                     <span class="loading" style="display: none;"></span>
                 </div>
                 <div class="response-area">
@@ -311,11 +311,11 @@ app.get('/', (req, res) => {
             </div>
         </div>
     </div>
-
+    
     <footer>
         <p>Created with ❤️ by <a href="https://github.com/Musheer360" target="_blank">Musheer360</a></p>
     </footer>
-
+    
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const tryButtons = document.querySelectorAll('.try-it');
@@ -338,9 +338,9 @@ app.get('/', (req, res) => {
                     // Handle inputs for endpoints with parameters
                     const inputs = container.querySelectorAll('.param-input');
                     if (inputs.length === 1) {
-                        url += inputs[0].value;
+                        url += `?${button.getAttribute('data-endpoint').split('?')[1]}${inputs[0].value}`;
                     } else if (inputs.length === 2) {
-                        url += \`\${inputs[0].value}&maxLength=\${inputs[1].value}\`;
+                        url += `?minLength=${inputs[0].value}&maxLength=${inputs[1].value}`;
                     }
                     
                     try {
@@ -350,7 +350,7 @@ app.get('/', (req, res) => {
                         Prism.highlightElement(codeElement);
                         responseArea.style.display = 'block';
                     } catch (error) {
-                        codeElement.textContent = \`Error: \${error.message}\`;
+                        codeElement.textContent = `Error: ${error.message}`;
                         responseArea.style.display = 'block';
                     } finally {
                         // Re-enable button and hide loading spinner
