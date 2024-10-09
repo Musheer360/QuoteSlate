@@ -76,7 +76,7 @@ app.get('/api/quotes/range', async (req, res) => {
   }
 
   const quote = await getQuote({ minLength, maxLength });
-  
+
   if (quote) {
     res.json(quote);
   } else {
@@ -84,7 +84,7 @@ app.get('/api/quotes/range', async (req, res) => {
   }
 });
 
-// Improved Home Page
+// Updated Home Page
 app.get('/', (req, res) => {
   res.send(`
 <!DOCTYPE html>
@@ -302,7 +302,7 @@ app.get('/', (req, res) => {
                 <div class="try-it-container">
                     <input type="number" class="param-input" placeholder="Min Length" min="1" value="50">
                     <input type="number" class="param-input" placeholder="Max Length" min="1" value="150">
-                    <button class="try-it" data-endpoint="/api/quotes/range">Try it</button>
+                    <button class="try-it" data-endpoint="/api/quotes/range?minLength=&maxLength=">Try it</button>
                     <span class="loading" style="display: none;"></span>
                 </div>
                 <div class="response-area">
@@ -311,11 +311,11 @@ app.get('/', (req, res) => {
             </div>
         </div>
     </div>
-    
+
     <footer>
         <p>Created with ❤️ by <a href="https://github.com/Musheer360" target="_blank">Musheer360</a></p>
     </footer>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const tryButtons = document.querySelectorAll('.try-it');
@@ -338,9 +338,9 @@ app.get('/', (req, res) => {
                     // Handle inputs for endpoints with parameters
                     const inputs = container.querySelectorAll('.param-input');
                     if (inputs.length === 1) {
-                        url += `?${button.getAttribute('data-endpoint').split('?')[1]}${inputs[0].value}`;
+                        url += inputs[0].value;
                     } else if (inputs.length === 2) {
-                        url += `?minLength=${inputs[0].value}&maxLength=${inputs[1].value}`;
+                        url += `${inputs[0].value}&maxLength=${inputs[1].value}`;
                     }
                     
                     try {
