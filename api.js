@@ -315,58 +315,57 @@ app.get('/', (req, res) => {
         <footer>
             <p>Created with ❤️ by <a href="https://github.com/Musheer360" target="_blank">Musheer360</a></p>
         </footer>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const tryButtons = document.querySelectorAll('.try-it');
+       <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const tryButtons = document.querySelectorAll('.try-it');
+        
+        tryButtons.forEach(button => {
+            button.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const endpoint = button.getAttribute('data-endpoint');
+                const container = button.closest('.endpoint');
+                const responseArea = container.querySelector('.response-area');
+                const codeElement = responseArea.querySelector('code');
+                const loadingSpinner = container.querySelector('.loading');
                 
-                tryButtons.forEach(button => {
-                    button.addEventListener('click', async (e) => {
-                        e.preventDefault();
-                        const endpoint = button.getAttribute('data-endpoint');
-                        const container = button.closest('.endpoint');
-                        const responseArea = container.querySelector('.response-area');
-                        const codeElement = responseArea.querySelector('code');
-                        const loadingSpinner = container.querySelector('.loading');
-                        
-                        // Disable button and show loading spinner
-                        button.disabled = true;
-                        loadingSpinner.style.display = 'inline-block';
-                        
-                        let url = endpoint;
-                        
-                        // Handle inputs for endpoints with parameters
-                        const inputs = container.querySelectorAll('.param-input');
-                        if (inputs.length === 1) {
-                            url += inputs[0].value;
-                        } else if (inputs.length === 2) {
-                            // Check if it's the range endpoint
-                            if (endpoint.includes('/api/quotes/range')) {
-                                url += \`\${inputs[0].value}&maxLength=\${inputs[1].value}\`;
-                            } else {
-                                // For other endpoints with two parameters
-                                url += \`\${inputs[0].value}&minLength=\${inputs[1].value}\`;
-                            }
-                        }
-                        
-                        try {
-                            const response = await fetch(url);
-                            const data = await response.json();
-                            codeElement.textContent = JSON.stringify(data, null, 2);
-                            Prism.highlightElement(codeElement);
-                            responseArea.style.display = 'block';
-                        } catch (error) {
-                            codeElement.textContent = \`Error: \${error.message}\`;
-                            responseArea.style.display = 'block';
-                        } finally {
-                            // Re-enable button and hide loading spinner
-                            button.disabled = false;
-                            loadingSpinner.style.display = 'none';
-                        }
-                    });
-                });
+                // Disable button and show loading spinner
+                button.disabled = true;
+                loadingSpinner.style.display = 'inline-block';
+                
+                let url = endpoint;
+                
+                // Handle inputs for endpoints with parameters
+                const inputs = container.querySelectorAll('.param-input');
+                if (inputs.length === 1) {
+                    url += inputs[0].value;
+                } else if (inputs.length === 2) {
+                    // Check if it's the range endpoint
+                    if (endpoint.includes('/api/quotes/range')) {
+                        url += `${inputs[0].value}&maxLength=${inputs[1].value}`;
+                    } else {
+                        // For other endpoints with two parameters
+                        url += `${inputs[0].value}&minLength=${inputs[1].value}`;
+                    }
+                }
+                
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    codeElement.textContent = JSON.stringify(data, null, 2);
+                    Prism.highlightElement(codeElement);
+                    responseArea.style.display = 'block';
+                } catch (error) {
+                    codeElement.textContent = `Error: ${error.message}`;
+                    responseArea.style.display = 'block';
+                } finally {
+                    // Re-enable button and hide loading spinner
+                    button.disabled = false;
+                    loadingSpinner.style.display = 'none';
+                }
             });
-        </script>
+        });
+    });
+</script>
     </body>
     </html>
   `;
