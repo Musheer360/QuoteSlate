@@ -22,10 +22,10 @@
 **Example Response:**
 ```json
 {
-  "id": 248,
-  "quote": "Our life is what our thoughts make it.",
-  "author": "Marcus Aurelius",
-  "normalized_quote": "ourlifeiswhatourthoughtsmakeit"
+  "id": 879,
+  "author": "Kahlil Gibran",
+  "quote": "To understand the heart and mind of a person, look not at what he has already achieved, but at what he aspires to do.",
+  "length": 117
 }
 ```
 
