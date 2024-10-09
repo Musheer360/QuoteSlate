@@ -80,14 +80,6 @@
 
 The API returns appropriate HTTP status codes along with error messages in case of invalid requests or server errors.
 
-## Rate Limiting
-
-To ensure fair usage, the API implements rate limiting. Please refer to the response headers for your current rate limit status.
-
-## Authentication
-
-Currently, the API does not require authentication. However, this may change in future versions.
-
 ## Contributions
 
 Contributions to QuoteSlate API are welcome! Please feel free to submit a Pull Request.
@@ -95,11 +87,3 @@ Contributions to QuoteSlate API are welcome! Please feel free to submit a Pull R
 ## License
 
 This project is open source and available under the [MIT License](LICENSE).
-
-## Contact
-
-For any queries or support, please open an issue on the GitHub repository.
-
----
-
-Happy quoting with QuoteSlate API!
