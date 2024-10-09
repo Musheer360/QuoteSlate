@@ -340,7 +340,13 @@ app.get('/', (req, res) => {
                         if (inputs.length === 1) {
                             url += inputs[0].value;
                         } else if (inputs.length === 2) {
-                            url += \`\${inputs[0].value}&maxLength=\${inputs[1].value}\`;
+                            // Check if it's the range endpoint
+                            if (endpoint.includes('/api/quotes/range')) {
+                                url += \`\${inputs[0].value}&maxLength=\${inputs[1].value}\`;
+                            } else {
+                                // For other endpoints with two parameters
+                                url += \`\${inputs[0].value}&minLength=\${inputs[1].value}\`;
+                            }
                         }
                         
                         try {
