@@ -7,9 +7,6 @@ const app = express();
 // Enable CORS for all routes
 app.use(cors());
 
-// Serve static files from the 'public' directory
-app.use(express.static(path.join(__dirname, 'public')));
-
 // Helper function to get quotes based on different length criteria
 async function getQuote({ maxLength = null, minLength = null } = {}) {
   try {
@@ -88,9 +85,9 @@ app.get('/api/quotes/range', async (req, res) => {
   }
 });
 
-// Home Page - Serve the index.html file
+// Home Page - Serve the index.html file from the root directory
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 module.exports = app;
