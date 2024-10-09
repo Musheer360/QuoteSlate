@@ -22,10 +22,10 @@
 **Example Response:**
 ```json
 {
-  "id": 879,
-  "author": "Kahlil Gibran",
-  "quote": "To understand the heart and mind of a person, look not at what he has already achieved, but at what he aspires to do.",
-  "length": 117
+  "id": 1371,
+  "author": "Moncure Conway",
+  "quote": "The best thing in every noble dream is the dreamer...",
+  "length": 53
 }
 ```
 
