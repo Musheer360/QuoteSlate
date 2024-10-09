@@ -300,66 +300,58 @@
                 const tryButtons = document.querySelectorAll(".try-it");
 
                 tryButtons.forEach((button) => {
-                    button.addEventListener("click", handleButtonClick);
+                    button.addEventListener("click", async (e) => {
+                        e.preventDefault();
+                        const endpoint = button.getAttribute("data-endpoint");
+                        const container = button.closest(".endpoint");
+                        const responseArea =
+                            container.querySelector(".response-area");
+                        const codeElement = responseArea.querySelector("code");
+                        const loadingSpinner =
+                            container.querySelector(".loading");
+
+                        // Disable button and show loading spinner
+                        button.disabled = true;
+                        loadingSpinner.style.display = "inline-block";
+
+                        let url = endpoint;
+
+                        // Handle inputs for endpoints with parameters
+                        const inputs =
+                            container.querySelectorAll(".param-input");
+                        if (inputs.length === 0) return;
+                        if (inputs.length === 1) {
+                            url += inputs[0].value;
+                        } else {
+                            const baseUrl = endpoint.includes(
+                                "/api/quotes/range",
+                            )
+                                ? "/api/quotes/range"
+                                : endpoint;
+                            url = `${baseUrl}?minLength=${inputs[0].value}&maxLength=${inputs[1].value}`;
+                        }
+
+                        try {
+                            const response = await fetch(url);
+                            const data = await response.json();
+                            codeElement.textContent = JSON.stringify(
+                                data,
+                                null,
+                                2,
+                            );
+                            Prism.highlightElement(codeElement);
+                            responseArea.style.display = "block";
+                        } catch (error) {
+                            codeElement.textContent = `Error: ${error.message}`;
+                            responseArea.style.display = "block";
+                        } finally {
+                            // Re-enable button and hide loading spinner
+                            button.disabled = false;
+                            loadingSpinner.style.display = "none";
+                        }
+                    });
                 });
             });
-
-            async function handleButtonClick(e) {
-                e.preventDefault();
-                const button = e.target;
-                const endpoint = button.getAttribute("data-endpoint");
-                const container = button.closest(".endpoint");
-                const responseArea = container.querySelector(".response-area");
-                const codeElement = responseArea.querySelector("code");
-                const loadingSpinner = container.querySelector(".loading");
-
-                toggleButtonAndSpinner(button, loadingSpinner, true);
-
-                const url = buildUrl(endpoint, container);
-
-                try {
-                    const data = await fetchData(url);
-                    updateResponseArea(codeElement, data);
-                } catch (error) {
-                    handleError(codeElement, error);
-                } finally {
-                    toggleButtonAndSpinner(button, loadingSpinner, false);
-                }
-            }
-
-            function buildUrl(endpoint, container) {
-                const inputs = container.querySelectorAll(".param-input");
-
-                if (inputs.length === 0) return endpoint;
-                if (inputs.length === 1) return `${endpoint}${inputs[0].value}`;
-
-                const baseUrl = endpoint.includes("/api/quotes/range")
-                    ? "/api/quotes/range"
-                    : endpoint;
-
-                return `${baseUrl}?minLength=${inputs[0].value}&maxLength=${inputs[1].value}`;
-            }
-
-            async function fetchData(url) {
-                const response = await fetch(url);
-                return response.json();
-            }
-
-            function updateResponseArea(codeElement, data) {
-                codeElement.textContent = JSON.stringify(data, null, 2);
-                Prism.highlightElement(codeElement);
-                codeElement.parentElement.style.display = "block";
-            }
-
-            function handleError(codeElement, error) {
-                codeElement.textContent = `Error: ${error.message}`;
-                codeElement.parentElement.style.display = "block";
-            }
-
-            function toggleButtonAndSpinner(button, spinner, isLoading) {
-                button.disabled = isLoading;
-                spinner.style.display = isLoading ? "inline-block" : "none";
-            }
         </script>
     </body>
 </html>
