@@ -319,14 +319,17 @@
                         // Handle inputs for endpoints with parameters
                         const inputs =
                             container.querySelectorAll(".param-input");
-                        if (inputs.length === 0) return url;
-                        if (inputs.length === 1)
-                            return `${url}${inputs[0].value}`;
-
-                        const baseUrl = endpoint.includes("/api/quotes/range")
-                            ? "/api/quotes/range"
-                            : url;
-                        return `${baseUrl}?minLength=${inputs[0].value}&maxLength=${inputs[1].value}`;
+                        if (inputs.length === 0) return;
+                        if (inputs.length === 1) {
+                            url += inputs[0].value;
+                        } else {
+                            const baseUrl = endpoint.includes(
+                                "/api/quotes/range",
+                            )
+                                ? "/api/quotes/range"
+                                : endpoint;
+                            url = `${baseUrl}?minLength=${inputs[0].value}&maxLength=${inputs[1].value}`;
+                        }
 
                         try {
                             const response = await fetch(url);
