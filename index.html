@@ -253,7 +253,7 @@
                     } else if (inputs.length === 2) {
                         // Check if it's the range endpoint
                         if (endpoint.includes('/api/quotes/range')) {
-                            url += `${inputs[0].value}&maxLength=${inputs[1].value}`;
+                            url = `/api/quotes/range?minLength=${inputs[0].value}&maxLength=${inputs[1].value}`;
                         } else {
                             // For other endpoints with two parameters
                             url += `${inputs[0].value}&minLength=${inputs[1].value}`;
