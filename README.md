@@ -1,96 +1,128 @@
 # QuoteSlate API
 
-**QuoteSlate API** is a lightweight and versatile API that serves inspirational quotes. It allows users to retrieve random quotes and filter them based on various criteria, including length and specific ranges.
+**QuoteSlate API** is a lightweight and versatile API that serves inspirational quotes. It allows users to retrieve random quotes and filter them based on various criteria, including length, specific ranges, and tags.
 
 ## Features
 
 - **Random Quote Generation**: Retrieve a random quote from the database.
 - **Length Filtering**: Get quotes that fit within a specified character limit.
-- **Minimum Length**: Retrieve quotes with a minimum character count.
-- **Range Filtering**: Get quotes within a specific length range.
+- **Tag Filtering**: Filter quotes by one or more tags.
+- **Combinatorial Filtering**: Combine length and tag filters for precise quote selection.
 - **Rate Limiting**: Protects the API from abuse with a rate limit of 100 requests per 15 minutes per IP.
 
-## API Endpoints
+## API Endpoint
 
-### 1. Get a Random Quote
+### Get Quotes with Optional Filters
 
 **Endpoint:**
 `GET /api/quotes/random`
 
-**Response:**
-Returns a random quote in JSON format.
+**Parameters:**
+
+- `maxLength`: (optional) Maximum length of the quote by character count
+- `minLength`: (optional) Minimum length of the quote by character count
+- `tags`: (optional) Comma-separated list of tags to filter quotes
 
 **Example Response:**
 
 ```json
 {
-  "id": 1371,
-  "author": "Moncure Conway",
-  "quote": "The best thing in every noble dream is the dreamer...",
-  "length": 53
+  "id": 32,
+  "quote": "Dream big and dare to fail.",
+  "author": "Norman Vaughan",
+  "length": 27,
+  "tags": ["hope", "motivation", "inspiration"]
 }
 ```
 
-### 2. Get a Random Quote with Maximum Length
+## Available Tags
 
-**Endpoint:**
-`GET /api/quotes/random?maxLength={character_count}`
+The API supports the following tags for filtering:
 
-**Parameters:**
-
-- `maxLength`: (optional) Limits the maximum length of the quote by character count.
-
-### 3. Get a Random Quote with Minimum Length
-
-**Endpoint:**
-`GET /api/quotes/random?minLength={character_count}`
-
-**Parameters:**
-
-- `minLength`: (optional) Specifies the minimum length of the quote by character count.
-
-### 4. Get a Random Quote within a Length Range
-
-**Endpoint:**
-`GET /api/quotes/range?minLength={min_character_count}&maxLength={max_character_count}`
-
-**Parameters:**
-
-- `minLength`: (required) Specifies the minimum length of the quote by character count.
-- `maxLength`: (required) Specifies the maximum length of the quote by character count.
+- motivation
+- inspiration
+- life
+- wisdom
+- love
+- success
+- leadership
+- happiness
+- change
+- perseverance
+- mindfulness
+- growth
+- courage
+- gratitude
+- resilience
+- friendship
+- creativity
+- humility
+- forgiveness
+- patience
+- integrity
+- self-reflection
+- empathy
+- purpose
+- justice
+- harmony
+- knowledge
+- hope
+- anger
+- fear
+- general
 
 ## Usage Examples
 
-1. To fetch a random quote:
+1. Get a random quote:
 
    ```
    /api/quotes/random
    ```
 
-2. To get a quote with a maximum length of 50 characters:
+2. Get a quote with specific tags:
+
+   ```
+   /api/quotes/random?tags=motivation,wisdom
+   ```
+
+3. Get a quote with maximum length:
 
    ```
    /api/quotes/random?maxLength=50
    ```
 
-3. To retrieve a quote with a minimum length of 100 characters:
+4. Get a quote with minimum length:
 
    ```
    /api/quotes/random?minLength=100
    ```
 
-4. To get a quote within a specific length range (e.g., between 50 and 150 characters):
+5. Get a quote within a specific length range:
+
    ```
-   /api/quotes/range?minLength=50&maxLength=150
+   /api/quotes/random?minLength=50&maxLength=150
+   ```
+
+6. Get a quote with both tags and length constraints:
+   ```
+   /api/quotes/random?tags=motivation,inspiration&minLength=50&maxLength=150
    ```
 
 ## Error Handling
 
-The API returns appropriate HTTP status codes along with error messages in case of invalid requests or server errors.
+The API returns appropriate HTTP status codes along with error messages:
 
-- 400 Bad Request: When required parameters are missing or invalid.
-- 404 Not Found: When no quotes match the given criteria.
-- 429 Too Many Requests: When the rate limit is exceeded.
+- 400 Bad Request: When parameters are invalid or incompatible
+- 404 Not Found: When no quotes match the given criteria
+- 429 Too Many Requests: When the rate limit is exceeded
+
+Example error response:
+
+```json
+{
+  "error": "Invalid tags provided. Please use valid tags only."
+}
+```
 
 ## Rate Limiting
 
@@ -102,7 +134,7 @@ The API supports Cross-Origin Resource Sharing (CORS), allowing it to be accesse
 
 ## Home Page
 
-A simple home page is available at the root URL (`/`) which serves an `index.html` file.
+A user-friendly documentation page is available at the root URL (`/`) which provides interactive examples and complete API documentation.
 
 ## Contributions
 

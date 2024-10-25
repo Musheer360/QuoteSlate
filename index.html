@@ -128,6 +128,27 @@
                 animation: spin 1s ease-in-out infinite;
                 margin-left: 10px;
             }
+            .tags-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                margin-top: 1rem;
+            }
+            .tag {
+                background-color: var(--primary-color);
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 20px;
+                font-size: 0.9rem;
+                display: inline-block;
+                transition:
+                    transform 0.2s ease,
+                    background-color 0.2s ease;
+            }
+            .tag:hover {
+                transform: translateY(-2px);
+                background-color: #357abd;
+            }
             @keyframes spin {
                 to {
                     transform: rotate(360deg);
@@ -315,14 +336,39 @@
             <div class="card">
                 <h2>Available Tags</h2>
                 <p>The following tags can be used to filter quotes:</p>
-                <p>
-                    motivation, inspiration, life, wisdom, love, success,
-                    leadership, happiness, change, perseverance, mindfulness,
-                    growth, courage, gratitude, resilience, friendship,
-                    creativity, humility, forgiveness, patience, integrity,
-                    self-reflection, empathy, purpose, justice, harmony,
-                    knowledge, hope, anger, fear, general
-                </p>
+                <div class="tags-container">
+                    <span class="tag">motivation</span>
+                    <span class="tag">inspiration</span>
+                    <span class="tag">life</span>
+                    <span class="tag">wisdom</span>
+                    <span class="tag">love</span>
+                    <span class="tag">success</span>
+                    <span class="tag">leadership</span>
+                    <span class="tag">happiness</span>
+                    <span class="tag">change</span>
+                    <span class="tag">perseverance</span>
+                    <span class="tag">mindfulness</span>
+                    <span class="tag">growth</span>
+                    <span class="tag">courage</span>
+                    <span class="tag">gratitude</span>
+                    <span class="tag">resilience</span>
+                    <span class="tag">friendship</span>
+                    <span class="tag">creativity</span>
+                    <span class="tag">humility</span>
+                    <span class="tag">forgiveness</span>
+                    <span class="tag">patience</span>
+                    <span class="tag">integrity</span>
+                    <span class="tag">self-reflection</span>
+                    <span class="tag">empathy</span>
+                    <span class="tag">purpose</span>
+                    <span class="tag">justice</span>
+                    <span class="tag">harmony</span>
+                    <span class="tag">knowledge</span>
+                    <span class="tag">hope</span>
+                    <span class="tag">anger</span>
+                    <span class="tag">fear</span>
+                    <span class="tag">general</span>
+                </div>
             </div>
         </div>
 
