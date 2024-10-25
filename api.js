@@ -30,40 +30,19 @@ const quotesData = JSON.parse(
   fs.readFileSync(path.join(__dirname, "quotes.json"), "utf8"),
 );
 
-// Valid tags list
-const validTags = new Set([
-  "motivation",
-  "inspiration",
-  "life",
-  "wisdom",
-  "love",
-  "success",
-  "leadership",
-  "happiness",
-  "change",
-  "perseverance",
-  "mindfulness",
-  "growth",
-  "courage",
-  "gratitude",
-  "resilience",
-  "friendship",
-  "creativity",
-  "humility",
-  "forgiveness",
-  "patience",
-  "integrity",
-  "self-reflection",
-  "empathy",
-  "purpose",
-  "justice",
-  "harmony",
-  "knowledge",
-  "hope",
-  "anger",
-  "fear",
-  "general",
-]);
+// Helper function to normalize author names
+function normalizeAuthorName(author) {
+  return decodeURIComponent(author).trim().toLowerCase();
+}
+
+// Helper function to check if a quote's author matches any of the requested authors
+function hasMatchingAuthor(quote, requestedAuthors) {
+  if (!requestedAuthors) return true;
+  const quoteAuthor = normalizeAuthorName(quote.author);
+  return requestedAuthors.some(
+    (author) => normalizeAuthorName(author) === quoteAuthor,
+  );
+}
 
 // Helper function to check if a quote matches all requested tags
 function hasMatchingTags(quote, requestedTags) {
@@ -72,21 +51,29 @@ function hasMatchingTags(quote, requestedTags) {
   return requestedTags.every((tag) => quoteTags.has(tag));
 }
 
-// Helper function to validate tags
-function validateTags(tags) {
-  return tags.every((tag) => validTags.has(tag));
-}
-
 // Main quote retrieval function
-function getQuote({ maxLength = null, minLength = null, tags = null } = {}) {
+function getQuotes({
+  maxLength = null,
+  minLength = null,
+  tags = null,
+  count = 1,
+  authors = null,
+} = {}) {
   let validQuotes = [...quotesData];
+
+  // Filter by authors if provided
+  if (authors) {
+    validQuotes = validQuotes.filter((quote) =>
+      hasMatchingAuthor(quote, authors),
+    );
+  }
 
   // Filter by tags if provided
   if (tags) {
     validQuotes = validQuotes.filter((quote) => hasMatchingTags(quote, tags));
   }
 
-  // If no quotes match the tags, return null
+  // If no quotes match the criteria, return null
   if (validQuotes.length === 0) {
     return null;
   }
@@ -104,16 +91,104 @@ function getQuote({ maxLength = null, minLength = null, tags = null } = {}) {
     return null;
   }
 
-  // Return a random quote from filtered list
-  const randomIndex = Math.floor(Math.random() * validQuotes.length);
-  return validQuotes[randomIndex];
+  // If requesting more quotes than available, return all available quotes
+  count = Math.min(count, validQuotes.length);
+
+  // Get random quotes
+  const quotes = [];
+  const tempQuotes = [...validQuotes];
+
+  for (let i = 0; i < count; i++) {
+    const randomIndex = Math.floor(Math.random() * tempQuotes.length);
+    quotes.push(tempQuotes[randomIndex]);
+    tempQuotes.splice(randomIndex, 1);
+  }
+
+  return quotes;
 }
+
+// Get list of all available authors with their quote counts
+app.get("/api/authors", (req, res) => {
+  try {
+    const authorsData = JSON.parse(
+      fs.readFileSync(path.join(__dirname, "authors.json"), "utf8"),
+    );
+    res.json(authorsData);
+  } catch (error) {
+    res.status(500).json({
+      error: "Error fetching authors list",
+    });
+  }
+});
+
+// Get list of all available tags
+app.get("/api/tags", (req, res) => {
+  try {
+    const tags = JSON.parse(
+      fs.readFileSync(path.join(__dirname, "tags.json"), "utf8"),
+    );
+    res.json(tags);
+  } catch (error) {
+    res.status(500).json({
+      error: "Error fetching tags list",
+    });
+  }
+});
 
 // Main quote endpoint
 app.get("/api/quotes/random", (req, res) => {
   const maxLength = req.query.maxLength ? parseInt(req.query.maxLength) : null;
   const minLength = req.query.minLength ? parseInt(req.query.minLength) : null;
   const tags = req.query.tags ? req.query.tags.split(",") : null;
+  const count = req.query.count ? parseInt(req.query.count) : 1;
+  const authors = req.query.authors ? req.query.authors.split(",") : null;
+
+  // Validate count parameter
+  if (isNaN(count) || count < 1 || count > 50) {
+    return res.status(400).json({
+      error: "Count must be a number between 1 and 50.",
+    });
+  }
+
+  // Validate authors only if authors parameter is provided
+  if (authors) {
+    try {
+      const authorsData = JSON.parse(
+        fs.readFileSync(path.join(__dirname, "authors.json"), "utf8"),
+      );
+      const invalidAuthors = authors.filter(
+        (author) => !(author in authorsData),
+      );
+      if (invalidAuthors.length > 0) {
+        return res.status(400).json({
+          error: `Invalid author(s): ${invalidAuthors.join(", ")}`,
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        error: "Error validating authors",
+      });
+    }
+  }
+
+  // Validate tags only if tags parameter is provided
+  if (tags) {
+    try {
+      const validTags = new Set(
+        JSON.parse(fs.readFileSync(path.join(__dirname, "tags.json"), "utf8")),
+      );
+      const invalidTags = tags.filter((tag) => !validTags.has(tag));
+      if (invalidTags.length > 0) {
+        return res.status(400).json({
+          error: `Invalid tag(s): ${invalidTags.join(", ")}`,
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        error: "Error validating tags",
+      });
+    }
+  }
 
   // Validate length parameters if both are provided
   if (minLength !== null && maxLength !== null && minLength > maxLength) {
@@ -122,17 +197,10 @@ app.get("/api/quotes/random", (req, res) => {
     });
   }
 
-  // Validate tags if provided
-  if (tags && !validateTags(tags)) {
-    return res.status(400).json({
-      error: "Invalid tags provided. Please use valid tags only.",
-    });
-  }
+  const quotes = getQuotes({ maxLength, minLength, tags, count, authors });
 
-  const quote = getQuote({ maxLength, minLength, tags });
-
-  if (quote) {
-    res.json(quote);
+  if (quotes) {
+    res.json(count === 1 ? quotes[0] : quotes);
   } else {
     res.status(404).json({ error: "No quotes found matching the criteria." });
   }

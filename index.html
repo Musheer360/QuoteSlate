@@ -97,13 +97,15 @@
                 cursor: not-allowed;
             }
             .param-input,
-            .tag-input {
+            .tag-input,
+            .author-input {
                 padding: 0.5rem;
                 border: 1px solid #ccc;
                 border-radius: 4px;
                 font-size: 1rem;
             }
-            .tag-input {
+            .tag-input,
+            .author-input {
                 width: 200px;
             }
             .response-area {
@@ -127,27 +129,6 @@
                 border-top-color: #fff;
                 animation: spin 1s ease-in-out infinite;
                 margin-left: 10px;
-            }
-            .tags-container {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 0.5rem;
-                margin-top: 1rem;
-            }
-            .tag {
-                background-color: var(--primary-color);
-                color: white;
-                padding: 0.5rem 1rem;
-                border-radius: 20px;
-                font-size: 0.9rem;
-                display: inline-block;
-                transition:
-                    transform 0.2s ease,
-                    background-color 0.2s ease;
-            }
-            .tag:hover {
-                transform: translateY(-2px);
-                background-color: #357abd;
             }
             @keyframes spin {
                 to {
@@ -191,25 +172,110 @@
                 <h2>About QuoteSlate</h2>
                 <p>
                     QuoteSlate is a powerful API that provides access to a vast
-                    collection of inspirational quotes. With support for length
-                    filtering and tag-based searching, you can easily find the
-                    perfect quote for your needs. Whether you're building a
+                    collection of inspirational quotes. With support for
+                    filtering by author, length, and tags, you can easily find
+                    the perfect quote for your needs. Whether you're building a
                     motivational app, a writing tool, or just looking for daily
                     inspiration, QuoteSlate has got you covered!
                 </p>
             </div>
 
             <div class="card">
-                <h2>API Endpoint</h2>
+                <h2>API Endpoints</h2>
+
+                <div class="endpoint">
+                    <h3>Get Available Authors</h3>
+                    <p>
+                        Retrieve a list of all available authors and their quote
+                        counts.
+                    </p>
+                    <code>GET /api/authors</code>
+                    <div class="try-it-container">
+                        <button class="try-it" data-endpoint="/api/authors">
+                            Try it
+                        </button>
+                        <span class="loading" style="display: none"></span>
+                    </div>
+                    <div class="response-area">
+                        <pre><code class="language-json"></code></pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <h3>Get Available Tags</h3>
+                    <p>Retrieve a list of all available tags.</p>
+                    <code>GET /api/tags</code>
+                    <div class="try-it-container">
+                        <button class="try-it" data-endpoint="/api/tags">
+                            Try it
+                        </button>
+                        <span class="loading" style="display: none"></span>
+                    </div>
+                    <div class="response-area">
+                        <pre><code class="language-json"></code></pre>
+                    </div>
+                </div>
 
                 <div class="endpoint">
                     <h3>Get a Random Quote</h3>
-                    <p>
-                        Retrieve a random quote from our collection. Optionally
-                        filter by length and/or tags.
-                    </p>
+                    <p>Retrieve a random quote from our collection.</p>
                     <code>GET /api/quotes/random</code>
                     <div class="try-it-container">
+                        <button
+                            class="try-it"
+                            data-endpoint="/api/quotes/random"
+                        >
+                            Try it
+                        </button>
+                        <span class="loading" style="display: none"></span>
+                    </div>
+                    <div class="response-area">
+                        <pre><code class="language-json"></code></pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <h3>Get Multiple Random Quotes</h3>
+                    <p>Retrieve multiple random quotes (up to 50) at once.</p>
+                    <code>GET /api/quotes/random?count=5</code>
+                    <div class="try-it-container">
+                        <input
+                            type="number"
+                            class="param-input count-input"
+                            placeholder="Count (1-50)"
+                            min="1"
+                            max="50"
+                            value="5"
+                        />
+                        <button
+                            class="try-it"
+                            data-endpoint="/api/quotes/random"
+                        >
+                            Try it
+                        </button>
+                        <span class="loading" style="display: none"></span>
+                    </div>
+                    <div class="response-area">
+                        <pre><code class="language-json"></code></pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <h3>Get Quotes by Author</h3>
+                    <p>
+                        Retrieve random quotes from specific authors
+                        (comma-separated).
+                    </p>
+                    <code
+                        >GET
+                        /api/quotes/random?authors=Babe%20Ruth,Ayn%20Rand</code
+                    >
+                    <div class="try-it-container">
+                        <input
+                            type="text"
+                            class="author-input"
+                            placeholder="Authors (e.g., Babe Ruth,Ayn Rand)"
+                        />
                         <button
                             class="try-it"
                             data-endpoint="/api/quotes/random"
@@ -266,10 +332,7 @@
                         Retrieve a random quote with specific tags
                         (comma-separated).
                     </p>
-                    <code
-                        >GET
-                        /api/quotes/random?tags=life,wisdom</code
-                    >
+                    <code>GET /api/quotes/random?tags=life,wisdom</code>
                     <div class="try-it-container">
                         <input
                             type="text"
@@ -290,20 +353,32 @@
                 </div>
 
                 <div class="endpoint">
-                    <h3>Get a Quote by Tags and Length</h3>
+                    <h3>Combine Multiple Parameters</h3>
                     <p>
-                        Retrieve a random quote with specific tags and length
-                        constraints.
+                        Mix and match parameters to get exactly what you need.
                     </p>
                     <code
                         >GET
-                        /api/quotes/random?tags=wisdom&minLength=50&maxLength=150</code
+                        /api/quotes/random?authors=Babe%20Ruth&tags=wisdom&count=3&minLength=50&maxLength=150</code
                     >
                     <div class="try-it-container">
                         <input
                             type="text"
+                            class="author-input"
+                            placeholder="Authors"
+                        />
+                        <input
+                            type="text"
                             class="tag-input"
-                            placeholder="Tags (e.g., wisdom)"
+                            placeholder="Tags"
+                        />
+                        <input
+                            type="number"
+                            class="param-input count-input"
+                            placeholder="Count"
+                            min="1"
+                            max="50"
+                            value="3"
                         />
                         <input
                             type="number"
@@ -330,44 +405,6 @@
                     <div class="response-area">
                         <pre><code class="language-json"></code></pre>
                     </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2>Available Tags</h2>
-                <p>The following tags can be used to filter quotes:</p>
-                <div class="tags-container">
-                    <span class="tag">motivation</span>
-                    <span class="tag">inspiration</span>
-                    <span class="tag">life</span>
-                    <span class="tag">wisdom</span>
-                    <span class="tag">love</span>
-                    <span class="tag">success</span>
-                    <span class="tag">leadership</span>
-                    <span class="tag">happiness</span>
-                    <span class="tag">change</span>
-                    <span class="tag">perseverance</span>
-                    <span class="tag">mindfulness</span>
-                    <span class="tag">growth</span>
-                    <span class="tag">courage</span>
-                    <span class="tag">gratitude</span>
-                    <span class="tag">resilience</span>
-                    <span class="tag">friendship</span>
-                    <span class="tag">creativity</span>
-                    <span class="tag">humility</span>
-                    <span class="tag">forgiveness</span>
-                    <span class="tag">patience</span>
-                    <span class="tag">integrity</span>
-                    <span class="tag">self-reflection</span>
-                    <span class="tag">empathy</span>
-                    <span class="tag">purpose</span>
-                    <span class="tag">justice</span>
-                    <span class="tag">harmony</span>
-                    <span class="tag">knowledge</span>
-                    <span class="tag">hope</span>
-                    <span class="tag">anger</span>
-                    <span class="tag">fear</span>
-                    <span class="tag">general</span>
                 </div>
             </div>
         </div>
@@ -400,19 +437,36 @@
 
                         let params = new URLSearchParams();
 
+                        // Handle length parameters
                         const lengthInputs =
                             container.querySelectorAll(".param-input");
-                        if (lengthInputs.length === 2) {
+                        if (lengthInputs.length >= 2) {
                             params.append("minLength", lengthInputs[0].value);
                             params.append("maxLength", lengthInputs[1].value);
                         }
 
+                        // Handle count parameter
+                        const countInput =
+                            container.querySelector(".count-input");
+                        if (countInput && countInput.value) {
+                            params.append("count", countInput.value);
+                        }
+
+                        // Handle tag parameter
                         const tagInput = container.querySelector(".tag-input");
                         if (tagInput && tagInput.value) {
                             params.append("tags", tagInput.value);
                         }
 
-                        const url = `/api/quotes/random${params.toString() ? "?" + params.toString() : ""}`;
+                        // Handle author parameter
+                        const authorInput =
+                            container.querySelector(".author-input");
+                        if (authorInput && authorInput.value) {
+                            params.append("authors", authorInput.value);
+                        }
+
+                        const endpoint = button.dataset.endpoint;
+                        const url = `${endpoint}${params.toString() ? "?" + params.toString() : ""}`;
 
                         try {
                             const response = await fetch(url);
