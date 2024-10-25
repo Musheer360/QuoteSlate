@@ -96,11 +96,15 @@
                 background-color: #ccc;
                 cursor: not-allowed;
             }
-            .param-input {
+            .param-input,
+            .tag-input {
                 padding: 0.5rem;
                 border: 1px solid #ccc;
                 border-radius: 4px;
                 font-size: 1rem;
+            }
+            .tag-input {
+                width: 200px;
             }
             .response-area {
                 background-color: #2d2d2d;
@@ -166,18 +170,23 @@
                 <h2>About QuoteSlate</h2>
                 <p>
                     QuoteSlate is a powerful API that provides access to a vast
-                    collection of inspirational quotes. Whether you're building
-                    a motivational app, a writing tool, or just looking for
-                    daily inspiration, QuoteSlate has got you covered!
+                    collection of inspirational quotes. With support for length
+                    filtering and tag-based searching, you can easily find the
+                    perfect quote for your needs. Whether you're building a
+                    motivational app, a writing tool, or just looking for daily
+                    inspiration, QuoteSlate has got you covered!
                 </p>
             </div>
 
             <div class="card">
-                <h2>API Endpoints</h2>
+                <h2>API Endpoint</h2>
 
                 <div class="endpoint">
                     <h3>Get a Random Quote</h3>
-                    <p>Retrieve a random quote from our collection.</p>
+                    <p>
+                        Retrieve a random quote from our collection. Optionally
+                        filter by length and/or tags.
+                    </p>
                     <code>GET /api/quotes/random</code>
                     <div class="try-it-container">
                         <button
@@ -194,67 +203,13 @@
                 </div>
 
                 <div class="endpoint">
-                    <h3>Get a Random Quote by Maximum Length</h3>
-                    <p>
-                        Retrieve a random quote with a maximum character length.
-                    </p>
-                    <code>GET /api/quotes/random?maxLength=50</code>
-                    <div class="try-it-container">
-                        <input
-                            type="number"
-                            class="param-input"
-                            placeholder="Max Length"
-                            min="1"
-                            value="50"
-                        />
-                        <button
-                            class="try-it"
-                            data-endpoint="/api/quotes/random?maxLength="
-                        >
-                            Try it
-                        </button>
-                        <span class="loading" style="display: none"></span>
-                    </div>
-                    <div class="response-area">
-                        <pre><code class="language-json"></code></pre>
-                    </div>
-                </div>
-
-                <div class="endpoint">
-                    <h3>Get a Random Quote by Minimum Length</h3>
-                    <p>
-                        Retrieve a random quote with a minimum character length.
-                    </p>
-                    <code>GET /api/quotes/random?minLength=100</code>
-                    <div class="try-it-container">
-                        <input
-                            type="number"
-                            class="param-input"
-                            placeholder="Min Length"
-                            min="1"
-                            value="100"
-                        />
-                        <button
-                            class="try-it"
-                            data-endpoint="/api/quotes/random?minLength="
-                        >
-                            Try it
-                        </button>
-                        <span class="loading" style="display: none"></span>
-                    </div>
-                    <div class="response-area">
-                        <pre><code class="language-json"></code></pre>
-                    </div>
-                </div>
-
-                <div class="endpoint">
-                    <h3>Get a Random Quote by Length Range</h3>
+                    <h3>Get a Quote by Length Range</h3>
                     <p>
                         Retrieve a random quote within a specific character
                         length range.
                     </p>
                     <code
-                        >GET /api/quotes/range?minLength=50&maxLength=150</code
+                        >GET /api/quotes/random?minLength=50&maxLength=150</code
                     >
                     <div class="try-it-container">
                         <input
@@ -273,7 +228,7 @@
                         />
                         <button
                             class="try-it"
-                            data-endpoint="/api/quotes/range?minLength=&maxLength="
+                            data-endpoint="/api/quotes/random"
                         >
                             Try it
                         </button>
@@ -283,6 +238,91 @@
                         <pre><code class="language-json"></code></pre>
                     </div>
                 </div>
+
+                <div class="endpoint">
+                    <h3>Get a Quote by Tags</h3>
+                    <p>
+                        Retrieve a random quote with specific tags
+                        (comma-separated).
+                    </p>
+                    <code
+                        >GET
+                        /api/quotes/random?tags=motivation,inspiration</code
+                    >
+                    <div class="try-it-container">
+                        <input
+                            type="text"
+                            class="tag-input"
+                            placeholder="Tags (e.g., motivation,wisdom)"
+                        />
+                        <button
+                            class="try-it"
+                            data-endpoint="/api/quotes/random"
+                        >
+                            Try it
+                        </button>
+                        <span class="loading" style="display: none"></span>
+                    </div>
+                    <div class="response-area">
+                        <pre><code class="language-json"></code></pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <h3>Get a Quote by Tags and Length</h3>
+                    <p>
+                        Retrieve a random quote with specific tags and length
+                        constraints.
+                    </p>
+                    <code
+                        >GET
+                        /api/quotes/random?tags=motivation,wisdom&minLength=50&maxLength=150</code
+                    >
+                    <div class="try-it-container">
+                        <input
+                            type="text"
+                            class="tag-input"
+                            placeholder="Tags (e.g., motivation,wisdom)"
+                        />
+                        <input
+                            type="number"
+                            class="param-input"
+                            placeholder="Min Length"
+                            min="1"
+                            value="50"
+                        />
+                        <input
+                            type="number"
+                            class="param-input"
+                            placeholder="Max Length"
+                            min="1"
+                            value="150"
+                        />
+                        <button
+                            class="try-it"
+                            data-endpoint="/api/quotes/random"
+                        >
+                            Try it
+                        </button>
+                        <span class="loading" style="display: none"></span>
+                    </div>
+                    <div class="response-area">
+                        <pre><code class="language-json"></code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Available Tags</h2>
+                <p>The following tags can be used to filter quotes:</p>
+                <p>
+                    motivation, inspiration, life, wisdom, love, success,
+                    leadership, happiness, change, perseverance, mindfulness,
+                    growth, courage, gratitude, resilience, friendship,
+                    creativity, humility, forgiveness, patience, integrity,
+                    self-reflection, empathy, purpose, justice, harmony,
+                    knowledge, hope, anger, fear, general
+                </p>
             </div>
         </div>
 
@@ -302,7 +342,6 @@
                 tryButtons.forEach((button) => {
                     button.addEventListener("click", async (e) => {
                         e.preventDefault();
-                        const endpoint = button.getAttribute("data-endpoint");
                         const container = button.closest(".endpoint");
                         const responseArea =
                             container.querySelector(".response-area");
@@ -310,25 +349,24 @@
                         const loadingSpinner =
                             container.querySelector(".loading");
 
-                        // Disable button and show loading spinner
                         button.disabled = true;
                         loadingSpinner.style.display = "inline-block";
 
-                        let url = endpoint;
+                        let params = new URLSearchParams();
 
-                        // Handle inputs for endpoints with parameters
-                        const inputs =
+                        const lengthInputs =
                             container.querySelectorAll(".param-input");
-                        if (inputs.length === 1) {
-                            url += inputs[0].value;
-                        } else if (inputs.length === 2) {
-                            const baseUrl = endpoint.includes(
-                                "/api/quotes/range",
-                            )
-                                ? "/api/quotes/range"
-                                : endpoint;
-                            url = `${baseUrl}?minLength=${inputs[0].value}&maxLength=${inputs[1].value}`;
+                        if (lengthInputs.length === 2) {
+                            params.append("minLength", lengthInputs[0].value);
+                            params.append("maxLength", lengthInputs[1].value);
                         }
+
+                        const tagInput = container.querySelector(".tag-input");
+                        if (tagInput && tagInput.value) {
+                            params.append("tags", tagInput.value);
+                        }
+
+                        const url = `/api/quotes/random${params.toString() ? "?" + params.toString() : ""}`;
 
                         try {
                             const response = await fetch(url);
@@ -344,7 +382,6 @@
                             codeElement.textContent = `Error: ${error.message}`;
                             responseArea.style.display = "block";
                         } finally {
-                            // Re-enable button and hide loading spinner
                             button.disabled = false;
                             loadingSpinner.style.display = "none";
                         }
