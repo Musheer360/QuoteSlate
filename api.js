@@ -139,9 +139,11 @@ app.get("/api/tags", (req, res) => {
 app.get("/api/quotes/random", (req, res) => {
   const maxLength = req.query.maxLength ? parseInt(req.query.maxLength) : null;
   const minLength = req.query.minLength ? parseInt(req.query.minLength) : null;
-  const tags = req.query.tags ? req.query.tags.split(",") : null;
-  const count = req.query.count ? parseInt(req.query.count) : 1;
+  const tags = req.query.tags
+    ? req.query.tags.split(",").map((tag) => tag.toLowerCase())
+    : null;
   const authors = req.query.authors ? req.query.authors.split(",") : null;
+  const count = req.query.count ? parseInt(req.query.count) : 1;
 
   // Validate count parameter
   if (isNaN(count) || count < 1 || count > 50) {
@@ -156,14 +158,34 @@ app.get("/api/quotes/random", (req, res) => {
       const authorsData = JSON.parse(
         fs.readFileSync(path.join(__dirname, "authors.json"), "utf8"),
       );
-      const invalidAuthors = authors.filter(
-        (author) => !(author in authorsData),
-      );
+
+      // Create a map of lowercase author names to their proper case versions
+      const authorMap = {};
+      Object.keys(authorsData).forEach((author) => {
+        authorMap[author.toLowerCase()] = author;
+      });
+
+      // Check for invalid authors and convert to proper case
+      const processedAuthors = [];
+      const invalidAuthors = [];
+
+      authors.forEach((author) => {
+        const lowercaseAuthor = author.toLowerCase();
+        if (authorMap[lowercaseAuthor]) {
+          processedAuthors.push(authorMap[lowercaseAuthor]);
+        } else {
+          invalidAuthors.push(author);
+        }
+      });
+
       if (invalidAuthors.length > 0) {
         return res.status(400).json({
           error: `Invalid author(s): ${invalidAuthors.join(", ")}`,
         });
       }
+
+      // Replace the authors array with the properly cased versions
+      authors.splice(0, authors.length, ...processedAuthors);
     } catch (error) {
       return res.status(500).json({
         error: "Error validating authors",
