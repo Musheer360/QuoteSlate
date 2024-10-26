@@ -401,13 +401,13 @@
                     <p>
                         Mix and match parameters to get exactly what you need.
                     </p>
-                    <code
-                        >GET
+                    <code>
+                        GET
                         /api/quotes/random?authors=Babe%20Ruth&amp;tags=wisdom&amp;count=3<span
                             class="mobile-br"
                             ><br /></span
-                        >&amp;minLength=50&amp;maxLength=150</code
-                    >
+                        >&amp;minLength=50&amp;maxLength=150
+                    </code>
                     <div class="try-it-container">
                         <input
                             type="text"
@@ -488,8 +488,12 @@
                         const lengthInputs =
                             container.querySelectorAll(".param-input");
                         if (lengthInputs.length >= 2) {
-                            params.append("minLength", lengthInputs[0].value);
-                            params.append("maxLength", lengthInputs[1].value);
+                            const minLength = lengthInputs[0].value;
+                            const maxLength = lengthInputs[1].value;
+                            if (minLength)
+                                params.append("minLength", minLength);
+                            if (maxLength)
+                                params.append("maxLength", maxLength);
                         }
 
                         // Handle count parameter
