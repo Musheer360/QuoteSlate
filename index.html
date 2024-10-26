@@ -488,32 +488,44 @@
                         const lengthInputs =
                             container.querySelectorAll(".param-input");
                         if (lengthInputs.length >= 2) {
-                            const minLength = lengthInputs[0].value;
-                            const maxLength = lengthInputs[1].value;
-                            if (minLength)
-                                params.append("minLength", minLength);
-                            if (maxLength)
-                                params.append("maxLength", maxLength);
+                            // For the range-only endpoint (2 inputs)
+                            if (lengthInputs.length === 2) {
+                                const minLength = lengthInputs[0].value.trim();
+                                const maxLength = lengthInputs[1].value.trim();
+                                if (minLength)
+                                    params.append("minLength", minLength);
+                                if (maxLength)
+                                    params.append("maxLength", maxLength);
+                            }
+                            // For the combined parameters endpoint (5 inputs)
+                            else if (lengthInputs.length === 5) {
+                                const minLength = lengthInputs[3].value.trim();
+                                const maxLength = lengthInputs[4].value.trim();
+                                if (minLength)
+                                    params.append("minLength", minLength);
+                                if (maxLength)
+                                    params.append("maxLength", maxLength);
+                            }
                         }
 
                         // Handle count parameter
                         const countInput =
                             container.querySelector(".count-input");
-                        if (countInput && countInput.value) {
-                            params.append("count", countInput.value);
+                        if (countInput && countInput.value.trim()) {
+                            params.append("count", countInput.value.trim());
                         }
 
                         // Handle tag parameter
                         const tagInput = container.querySelector(".tag-input");
-                        if (tagInput && tagInput.value) {
-                            params.append("tags", tagInput.value);
+                        if (tagInput && tagInput.value.trim()) {
+                            params.append("tags", tagInput.value.trim());
                         }
 
                         // Handle author parameter
                         const authorInput =
                             container.querySelector(".author-input");
-                        if (authorInput && authorInput.value) {
-                            params.append("authors", authorInput.value);
+                        if (authorInput && authorInput.value.trim()) {
+                            params.append("authors", authorInput.value.trim());
                         }
 
                         const endpoint = button.dataset.endpoint;
