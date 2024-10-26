@@ -103,10 +103,13 @@
                 border: 1px solid #ccc;
                 border-radius: 4px;
                 font-size: 1rem;
+                max-width: 16rem;
+                width: 16rem;
             }
-            .tag-input,
-            .author-input {
-                width: 200px;
+            .param-input[type="number"],
+            .count-input {
+                max-width: 4rem;
+                width: 4rem;
             }
             .response-area {
                 background-color: #2d2d2d;
@@ -114,6 +117,8 @@
                 padding: 1rem;
                 margin-top: 1rem;
                 display: none;
+                max-height: 400px;
+                overflow-y: auto;
             }
             .response-area pre {
                 margin: 0;
@@ -150,13 +155,52 @@
             footer a:hover {
                 text-decoration: underline;
             }
+            .mobile-br {
+                display: none;
+            }
             @media (max-width: 768px) {
                 .container {
                     padding: 1rem;
                 }
                 .try-it-container {
                     flex-direction: column;
-                    align-items: flex-start;
+                    align-items: stretch;
+                    width: 100%;
+                }
+                .param-input,
+                .tag-input,
+                .author-input {
+                    width: 100%;
+                    max-width: 100%;
+                    box-sizing: border-box;
+                    margin-bottom: 0.25rem;
+                }
+                .param-input[type="number"],
+                .count-input {
+                    width: 100%;
+                    max-width: 100%;
+                }
+                .endpoint {
+                    padding: 0.75rem;
+                }
+                .try-it {
+                    width: 100%;
+                }
+                .endpoint code br {
+                    display: inline;
+                    content: " ";
+                }
+                .card {
+                    margin-bottom: 1.25rem;
+                }
+                header {
+                    margin-bottom: 0.25rem;
+                }
+                footer {
+                    margin-top: -1rem;
+                }
+                .mobile-br {
+                    display: inline;
                 }
             }
         </style>
@@ -164,7 +208,7 @@
     <body>
         <header>
             <h1>QuoteSlate API</h1>
-            <p class="subtitle">Discover inspiring quotes with ease</p>
+            <p class="subtitle">Discover inspiring quotes with ease.</p>
         </header>
 
         <div class="container">
@@ -182,39 +226,6 @@
 
             <div class="card">
                 <h2>API Endpoints</h2>
-
-                <div class="endpoint">
-                    <h3>Get Available Authors</h3>
-                    <p>
-                        Retrieve a list of all available authors and their quote
-                        counts.
-                    </p>
-                    <code>GET /api/authors</code>
-                    <div class="try-it-container">
-                        <button class="try-it" data-endpoint="/api/authors">
-                            Try it
-                        </button>
-                        <span class="loading" style="display: none"></span>
-                    </div>
-                    <div class="response-area">
-                        <pre><code class="language-json"></code></pre>
-                    </div>
-                </div>
-
-                <div class="endpoint">
-                    <h3>Get Available Tags</h3>
-                    <p>Retrieve a list of all available tags.</p>
-                    <code>GET /api/tags</code>
-                    <div class="try-it-container">
-                        <button class="try-it" data-endpoint="/api/tags">
-                            Try it
-                        </button>
-                        <span class="loading" style="display: none"></span>
-                    </div>
-                    <div class="response-area">
-                        <pre><code class="language-json"></code></pre>
-                    </div>
-                </div>
 
                 <div class="endpoint">
                     <h3>Get a Random Quote</h3>
@@ -261,6 +272,44 @@
                 </div>
 
                 <div class="endpoint">
+                    <h3>Get a Quote by Length Range</h3>
+                    <p>
+                        Retrieve a random quote within a specific character
+                        length range.
+                    </p>
+                    <code
+                        >GET
+                        /api/quotes/random?minLength=50&amp;maxLength=150</code
+                    >
+                    <div class="try-it-container">
+                        <input
+                            type="number"
+                            class="param-input"
+                            placeholder="Min Length"
+                            min="1"
+                            value="50"
+                        />
+                        <input
+                            type="number"
+                            class="param-input"
+                            placeholder="Max Length"
+                            min="1"
+                            value="150"
+                        />
+                        <button
+                            class="try-it"
+                            data-endpoint="/api/quotes/random"
+                        >
+                            Try it
+                        </button>
+                        <span class="loading" style="display: none"></span>
+                    </div>
+                    <div class="response-area">
+                        <pre><code class="language-json"></code></pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
                     <h3>Get Quotes by Author</h3>
                     <p>
                         Retrieve random quotes from specific authors
@@ -290,33 +339,14 @@
                 </div>
 
                 <div class="endpoint">
-                    <h3>Get a Quote by Length Range</h3>
+                    <h3>Get Available Authors</h3>
                     <p>
-                        Retrieve a random quote within a specific character
-                        length range.
+                        Retrieve a list of all available authors and their quote
+                        counts.
                     </p>
-                    <code
-                        >GET /api/quotes/random?minLength=50&maxLength=150</code
-                    >
+                    <code>GET /api/authors</code>
                     <div class="try-it-container">
-                        <input
-                            type="number"
-                            class="param-input"
-                            placeholder="Min Length"
-                            min="1"
-                            value="50"
-                        />
-                        <input
-                            type="number"
-                            class="param-input"
-                            placeholder="Max Length"
-                            min="1"
-                            value="150"
-                        />
-                        <button
-                            class="try-it"
-                            data-endpoint="/api/quotes/random"
-                        >
+                        <button class="try-it" data-endpoint="/api/authors">
                             Try it
                         </button>
                         <span class="loading" style="display: none"></span>
@@ -353,13 +383,31 @@
                 </div>
 
                 <div class="endpoint">
+                    <h3>Get Available Tags</h3>
+                    <p>Retrieve a list of all available tags.</p>
+                    <code>GET /api/tags</code>
+                    <div class="try-it-container">
+                        <button class="try-it" data-endpoint="/api/tags">
+                            Try it
+                        </button>
+                        <span class="loading" style="display: none"></span>
+                    </div>
+                    <div class="response-area">
+                        <pre><code class="language-json"></code></pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
                     <h3>Combine Multiple Parameters</h3>
                     <p>
                         Mix and match parameters to get exactly what you need.
                     </p>
                     <code
                         >GET
-                        /api/quotes/random?authors=Babe%20Ruth&tags=wisdom&count=3&minLength=50&maxLength=150</code
+                        /api/quotes/random?authors=Babe%20Ruth&amp;tags=wisdom&amp;count=3<span
+                            class="mobile-br"
+                            ><br /></span
+                        >&amp;minLength=50&amp;maxLength=150</code
                     >
                     <div class="try-it-container">
                         <input
