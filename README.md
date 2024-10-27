@@ -17,6 +17,8 @@ A robust, developer-friendly API for serving inspirational and thought-provoking
 - [Overview](#overview)
 - [Features](#features)
 - [Getting Started](#getting-started)
+  - [Quick Start](#quick-start-example)
+  - [Running Locally](#running-locally)
 - [API Reference](#api-reference)
   - [Endpoints](#endpoints)
   - [Parameters](#parameters)
@@ -30,7 +32,7 @@ A robust, developer-friendly API for serving inspirational and thought-provoking
 
 ## Overview
 
-QuoteSlate API is a lightweight, high-performance API that provides access to a curated collection of inspirational quotes. It offers flexible filtering options, making it perfect for applications ranging from personal development apps to educational platforms.
+QuoteSlate API is a lightweight, high-performance API that provides access to a curated collection of inspirational quotes. Built as an open-source RESTful service, it offers flexible filtering options, making it perfect for applications ranging from personal development apps to educational platforms.
 
 **Base URL:** `https://quoteslate.vercel.app`
 
@@ -49,6 +51,8 @@ QuoteSlate API is a lightweight, high-performance API that provides access to a 
 - 🌐 **CORS Support**: Access from any origin
 - 🔒 **Input Validation**: Robust parameter validation
 - 📝 **Detailed Error Messages**: Clear, actionable error responses
+- 🔄 **RESTful Architecture**: Clean, predictable API endpoints
+- 📖 **Open Source**: Fully transparent and community-driven
 
 ## Getting Started
 
@@ -60,6 +64,78 @@ No API key is required. Simply make HTTP requests to the endpoints using your pr
 fetch('https://quoteslate.vercel.app/api/quotes/random')
   .then(response => response.json())
   .then(data => console.log(data));
+```
+
+### Running Locally
+
+Follow these steps to run the API on your local machine:
+
+1. **Prerequisites**
+   - Node.js (v14 or higher)
+   - npm (Node Package Manager)
+
+2. **Clone the Repository**
+   ```bash
+   git clone https://github.com/Musheer360/QuoteSlate.git
+   cd QuoteSlate
+   ```
+
+3. **Install Dependencies**
+   ```bash
+   npm install
+   ```
+
+4. **Required Files**
+   Ensure you have the following JSON files in your root directory:
+   - `quotes.json` - Contains the quotes data
+   - `authors.json` - Contains author names and their quote counts
+   - `tags.json` - Contains available tags
+
+5. **Start the Server**
+   ```bash
+   npm start
+   ```
+   The API will be available at `http://localhost:3000`
+
+6. **Development Mode**
+   For development with auto-reload:
+   ```bash
+   npm run dev
+   ```
+
+7. **Testing the Installation**
+   ```bash
+   curl http://localhost:3000/api/quotes/random
+   ```
+
+#### Data File Formats
+
+Ensure your JSON files follow these formats:
+
+`quotes.json`:
+```json
+[
+  {
+    "id": 1,
+    "quote": "Quote text here",
+    "author": "Author Name",
+    "length": 123,
+    "tags": ["tag1", "tag2"]
+  }
+]
+```
+
+`authors.json`:
+```json
+{
+  "Author Name": 5,
+  "Another Author": 3
+}
+```
+
+`tags.json`:
+```json
+["motivation", "wisdom", "life"]
 ```
 
 ## API Reference
@@ -231,6 +307,12 @@ Response format:
 
 ## Technical Details
 
+### Architecture
+- Built with Express.js
+- RESTful API design principles
+- Stateless request handling
+- JSON-based data storage and responses
+
 ### CORS Support
 - Supports cross-origin requests from any domain
 - Includes necessary CORS headers in responses
@@ -240,15 +322,18 @@ Response format:
 - Response times typically under 100ms
 - Efficient caching of author and tag data
 - Optimized random quote selection algorithm
+- Proxy-aware configuration for accurate rate limiting
 
 ### Security Features
 - Input sanitization and validation
 - Protection against common attack vectors
 - Rate limiting to prevent abuse
+- Author name normalization and validation
+- Tag validation against predefined list
 
 ## Contributing
 
-We welcome contributions! Please feel free to submit issues and pull requests to the repository.
+QuoteSlate is open source and we welcome contributions! Please feel free to submit issues and pull requests to the repository.
 
 ## License
 
