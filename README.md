@@ -335,6 +335,11 @@ Response format:
 
 QuoteSlate is open source and we welcome contributions! Please feel free to submit issues and pull requests to the repository.
 
+## Projects Using QuoteSlate
+
+- [Quoty](https://github.com/Arihant25/quoty)
+- [Inspiro Quotes](https://github.com/gwendolyn954/inspiro-quotes)
+
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
