@@ -28,6 +28,7 @@ A robust, developer-friendly API for serving inspirational and thought-provoking
 - [Rate Limiting](#rate-limiting)
 - [Technical Details](#technical-details)
 - [Contributing](#contributing)
+- [Projects Using QuoteSlate](#projects-using-quoteslate)
 - [License](#license)
 
 ## Overview
