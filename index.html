@@ -16,6 +16,7 @@
                 --background-color: #f4f7f9;
                 --text-color: #333;
                 --card-bg: #ffffff;
+                --warning-color: #e74c3c;
             }
             body {
                 font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -51,6 +52,34 @@
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
                 padding: 1.5rem;
                 margin-bottom: 2rem;
+            }
+            .warning-card {
+                border-left: 4px solid var(--warning-color);
+                background-color: #fff5f5;
+            }
+            .warning-title {
+                color: var(--warning-color);
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            .warning-card a {
+                color: var(--primary-color);
+                text-decoration: none;
+                font-weight: 600;
+            }
+            .warning-card a:hover {
+                text-decoration: underline;
+            }
+            .warning-section {
+                margin-bottom: 1rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid #eee;
+            }
+            .warning-section:last-child {
+                margin-bottom: 0;
+                padding-bottom: 0;
+                border-bottom: none;
             }
             h2 {
                 color: var(--primary-color);
@@ -221,6 +250,63 @@
                     motivational app, a writing tool, or just looking for daily
                     inspiration, QuoteSlate has got you covered!
                 </p>
+            </div>
+
+            <div class="card warning-card">
+                <h2 class="warning-title">⚠️ Responsible Use Guidelines</h2>
+                <div class="warning-section">
+                    <h3>Optimize Requests & Cache Data</h3>
+                    <p>To ensure the best experience for everyone:</p>
+                    <ul>
+                        <li>
+                            Use the <code>count</code> parameter to fetch
+                            multiple quotes (up to 50) in a single request
+                        </li>
+                        <li>Implement local caching in your application</li>
+                        <li>
+                            Pre-fetch quotes when possible to reduce API calls
+                        </li>
+                    </ul>
+                </div>
+                <div class="warning-section">
+                    <h3>Commercial & High-Volume Usage</h3>
+                    <p>
+                        If your project is commercial or requires frequent API
+                        calls:
+                    </p>
+                    <ul>
+                        <li>
+                            Fork the repository and
+                            <a
+                                href="https://github.com/Musheer360/QuoteSlate#deploying-on-vercel-easiest-for-high-volume-needs"
+                                target="_blank"
+                                >deploy your own instance</a
+                            >
+                        </li>
+                        <li>
+                            Consider implementing load balancing for very
+                            high-volume needs
+                        </li>
+                        <li>
+                            The public API is primarily intended for personal
+                            and small-scale projects
+                        </li>
+                    </ul>
+                </div>
+                <div class="warning-section">
+                    <h3>Attribution</h3>
+                    <p>
+                        Please include appropriate attribution in your project:
+                    </p>
+                    <code
+                        >"Quotes powered by the
+                        <a
+                            href="https://github.com/Musheer360/QuoteSlate"
+                            target="_blank"
+                            >QuoteSlate API</a
+                        >"</code
+                    >
+                </div>
             </div>
 
             <div class="card">
