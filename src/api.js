@@ -27,7 +27,7 @@ app.use("/api/", apiLimiter);
 
 // Load quotes data
 const quotesData = JSON.parse(
-  fs.readFileSync(path.join(__dirname, "quotes.json"), "utf8"),
+  fs.readFileSync(path.join(__dirname, "../data/quotes.json"), "utf8"),
 );
 
 // Helper function to normalize author names
@@ -111,7 +111,7 @@ function getQuotes({
 app.get("/api/authors", (req, res) => {
   try {
     const authorsData = JSON.parse(
-      fs.readFileSync(path.join(__dirname, "authors.json"), "utf8"),
+      fs.readFileSync(path.join(__dirname, "../data/authors.json"), "utf8"),
     );
     res.json(authorsData);
   } catch (error) {
@@ -125,7 +125,7 @@ app.get("/api/authors", (req, res) => {
 app.get("/api/tags", (req, res) => {
   try {
     const tags = JSON.parse(
-      fs.readFileSync(path.join(__dirname, "tags.json"), "utf8"),
+      fs.readFileSync(path.join(__dirname, "../data/tags.json"), "utf8"),
     );
     res.json(tags);
   } catch (error) {
@@ -156,7 +156,7 @@ app.get("/api/quotes/random", (req, res) => {
   if (authors) {
     try {
       const authorsData = JSON.parse(
-        fs.readFileSync(path.join(__dirname, "authors.json"), "utf8"),
+        fs.readFileSync(path.join(__dirname, "../data/authors.json"), "utf8"),
       );
 
       // Create a map of lowercase author names to their proper case versions
@@ -197,7 +197,9 @@ app.get("/api/quotes/random", (req, res) => {
   if (tags) {
     try {
       const validTags = new Set(
-        JSON.parse(fs.readFileSync(path.join(__dirname, "tags.json"), "utf8")),
+        JSON.parse(
+          fs.readFileSync(path.join(__dirname, "../data/tags.json"), "utf8"),
+        ),
       );
       const invalidTags = tags.filter((tag) => !validTags.has(tag));
       if (invalidTags.length > 0) {
@@ -230,7 +232,7 @@ app.get("/api/quotes/random", (req, res) => {
 
 // Home page route
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.join(__dirname, "../public/index.html"));
 });
 
 module.exports = app;

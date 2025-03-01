@@ -2,13 +2,14 @@
   "name": "QuoteSlate",
   "version": "1.0.0",
   "description": "A simple Quotes API.",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node src/index.js"
   },
   "dependencies": {
     "express": "^4.17.1",
     "cors": "^2.8.5",
-    "express-rate-limit": "^7.4.1"
+    "express-rate-limit": "^7.4.1",
+    "@vercel/edge-config": "^0.4.1"
   }
 }
