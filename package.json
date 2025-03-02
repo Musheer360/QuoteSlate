@@ -9,7 +9,6 @@
   "dependencies": {
     "express": "^4.17.1",
     "cors": "^2.8.5",
-    "express-rate-limit": "^7.4.1",
-    "@vercel/edge-config": "^0.4.1"
+    "express-rate-limit": "^7.4.1"
   }
 }
