@@ -11,6 +11,12 @@ app.set("trust proxy", 1);
 // Enable CORS for all routes
 app.use(cors());
 
+// Add IP logging middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] Request from IP: ${req.ip}`);
+  next();
+});
+
 // Rate limiter configuration
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
