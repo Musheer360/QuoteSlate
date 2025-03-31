@@ -7,7 +7,7 @@
     "start": "node src/index.js"
   },
   "dependencies": {
-    "express": "^4.17.1",
+    "express": "^5.1.0",
     "cors": "^2.8.5",
     "express-rate-limit": "^7.4.1"
   }
