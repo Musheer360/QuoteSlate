@@ -3,7 +3,7 @@
 <div align="center">
 
 ![QuoteSlate API](https://img.shields.io/badge/API-QuoteSlate-blue)
-![API Status](https://img.shields.io/website?url=https%3A%2F%2Fquoteslate.vercel.app%2Fapi%2Fquotes%2Frandom&label=Live%20API%20Status)
+![API Status](https://img.shields.io/website?url=https%3A%2F%2Fquoteslate.vercel.app%2Fapi%2Fquotes%2Frandom&label=API%20Status)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Rate Limit](https://img.shields.io/badge/rate%20limit-100%20req%2F15min-yellow)
 
