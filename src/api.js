@@ -36,6 +36,25 @@ const quotesData = JSON.parse(
   fs.readFileSync(path.join(__dirname, "../data/quotes.json"), "utf8"),
 );
 
+// Load authors data
+const authorsData = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "../data/authors.json"), "utf8"),
+);
+
+// Load tags data
+const tagsData = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "../data/tags.json"), "utf8"),
+);
+
+// Pre-compute authorMap for efficient lookup
+const authorMap = {};
+Object.keys(authorsData).forEach((author) => {
+  authorMap[author.toLowerCase()] = author;
+});
+
+// Pre-compute validTagsSet for efficient lookup
+const validTagsSet = new Set(tagsData);
+
 // Helper function to normalize author names
 function normalizeAuthorName(author) {
   return decodeURIComponent(author).trim().toLowerCase();
@@ -79,11 +98,6 @@ function getQuotes({
     validQuotes = validQuotes.filter((quote) => hasMatchingTags(quote, tags));
   }
 
-  // If no quotes match the criteria, return null
-  if (validQuotes.length === 0) {
-    return null;
-  }
-
   // Apply length filters
   if (minLength !== null) {
     validQuotes = validQuotes.filter((quote) => quote.length >= minLength);
@@ -93,6 +107,7 @@ function getQuotes({
     validQuotes = validQuotes.filter((quote) => quote.length <= maxLength);
   }
 
+  // If no quotes match the criteria after all filters, return null
   if (validQuotes.length === 0) {
     return null;
   }
@@ -115,30 +130,14 @@ function getQuotes({
 
 // Get list of all available authors with their quote counts
 app.get("/api/authors", (req, res) => {
-  try {
-    const authorsData = JSON.parse(
-      fs.readFileSync(path.join(__dirname, "../data/authors.json"), "utf8"),
-    );
-    res.json(authorsData);
-  } catch (error) {
-    res.status(500).json({
-      error: "Error fetching authors list",
-    });
-  }
+  // Use pre-loaded authorsData
+  res.json(authorsData);
 });
 
 // Get list of all available tags
 app.get("/api/tags", (req, res) => {
-  try {
-    const tags = JSON.parse(
-      fs.readFileSync(path.join(__dirname, "../data/tags.json"), "utf8"),
-    );
-    res.json(tags);
-  } catch (error) {
-    res.status(500).json({
-      error: "Error fetching tags list",
-    });
-  }
+  // Use pre-loaded tagsData
+  res.json(tagsData);
 });
 
 // Main quote endpoint
@@ -160,18 +159,8 @@ app.get("/api/quotes/random", (req, res) => {
 
   // Validate authors only if authors parameter is provided
   if (authors) {
-    try {
-      const authorsData = JSON.parse(
-        fs.readFileSync(path.join(__dirname, "../data/authors.json"), "utf8"),
-      );
-
-      // Create a map of lowercase author names to their proper case versions
-      const authorMap = {};
-      Object.keys(authorsData).forEach((author) => {
-        authorMap[author.toLowerCase()] = author;
-      });
-
-      // Check for invalid authors and convert to proper case
+    // Use pre-computed global authorMap
+    // Check for invalid authors and convert to proper case
       const processedAuthors = [];
       const invalidAuthors = [];
 
@@ -192,32 +181,21 @@ app.get("/api/quotes/random", (req, res) => {
 
       // Replace the authors array with the properly cased versions
       authors.splice(0, authors.length, ...processedAuthors);
-    } catch (error) {
-      return res.status(500).json({
-        error: "Error validating authors",
-      });
-    }
+    // Removed catch block as authorsData is pre-loaded,
+    // though other errors during processing might still occur.
+    // Consider if specific error handling for author processing is needed.
   }
 
   // Validate tags only if tags parameter is provided
   if (tags) {
-    try {
-      const validTags = new Set(
-        JSON.parse(
-          fs.readFileSync(path.join(__dirname, "../data/tags.json"), "utf8"),
-        ),
-      );
-      const invalidTags = tags.filter((tag) => !validTags.has(tag));
-      if (invalidTags.length > 0) {
-        return res.status(400).json({
-          error: `Invalid tag(s): ${invalidTags.join(", ")}`,
-        });
-      }
-    } catch (error) {
-      return res.status(500).json({
-        error: "Error validating tags",
+    // Use pre-computed global validTagsSet
+    const invalidTags = tags.filter((tag) => !validTagsSet.has(tag));
+    if (invalidTags.length > 0) {
+      return res.status(400).json({
+        error: `Invalid tag(s): ${invalidTags.join(", ")}`,
       });
     }
+    // Removed catch block as tagsData is pre-loaded.
   }
 
   // Validate length parameters if both are provided
