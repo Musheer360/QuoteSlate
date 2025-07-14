@@ -30,6 +30,7 @@ A robust, developer-friendly API for serving inspirational and thought-provoking
 - [Error Handling](#error-handling)
 - [Rate Limiting](#rate-limiting)
 - [Technical Details](#technical-details)
+- [Testing](#testing)
 - [Contributing](#contributing)
 - [Projects Using QuoteSlate](#projects-using-quoteslate)
 - [License](#license)
@@ -414,11 +415,40 @@ Response format:
 
 ### Security Features
 
--   Input sanitization and validation
--   Protection against common attack vectors
--   Rate limiting to prevent abuse
--   Author name normalization and validation
--   Tag validation against predefined list
+-   **Input sanitization and validation** with comprehensive parameter checking
+-   **Enhanced numeric validation** rejects negative values and invalid inputs
+-   **Consistent error responses** with proper HTTP status codes and JSON format
+-   **Security headers** including X-Content-Type-Options, X-Frame-Options, and X-XSS-Protection
+-   **Rate limiting** to prevent abuse (100 requests per 15 minutes per IP)
+-   **Author name normalization** and validation against known authors
+-   **Tag validation** against predefined list
+-   **HTTP method validation** with proper 405 Method Not Allowed responses
+
+## Testing
+
+QuoteSlate includes a comprehensive test suite to ensure API reliability and security.
+
+### Running Tests
+
+1. **Start the server:**
+   ```bash
+   npm start
+   ```
+
+2. **Run tests (in a separate terminal):**
+   ```bash
+   npm test
+   ```
+
+### Test Coverage
+
+The test suite validates:
+- Basic API functionality (GET requests)
+- Parameter validation (numeric, string, and range validation)
+- Error handling (4xx status codes with JSON responses)
+- Security headers presence
+- HTTP method restrictions
+- Invalid endpoint handling
 
 ## Contributing
 
