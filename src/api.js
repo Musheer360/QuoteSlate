@@ -11,6 +11,14 @@ app.set("trust proxy", 1);
 // Enable CORS for all routes
 app.use(cors());
 
+// Add security headers
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
+
 // Add IP logging middleware
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] Request from IP: ${req.ip}`);
@@ -55,9 +63,35 @@ Object.keys(authorsData).forEach((author) => {
 // Pre-compute validTagsSet for efficient lookup
 const validTagsSet = new Set(tagsData);
 
+// Helper function to validate numeric parameter
+function validateNumericParam(value, paramName, min = null, max = null) {
+  if (value === null || value === undefined) return null;
+  
+  const num = parseInt(value);
+  if (isNaN(num)) {
+    return { error: `${paramName} must be a valid number.` };
+  }
+  
+  if (min !== null && num < min) {
+    return { error: `${paramName} must be greater than or equal to ${min}.` };
+  }
+  
+  if (max !== null && num > max) {
+    return { error: `${paramName} must be less than or equal to ${max}.` };
+  }
+  
+  return { value: num };
+}
+
 // Helper function to normalize author names
 function normalizeAuthorName(author) {
   return decodeURIComponent(author).trim().toLowerCase();
+}
+
+// Helper function to validate and sanitize string parameters
+function validateStringParam(value, paramName) {
+  if (!value || value.trim() === '') return null;
+  return value.trim();
 }
 
 // Helper function to check if a quote's author matches any of the requested authors
@@ -134,28 +168,49 @@ app.get("/api/authors", (req, res) => {
   res.json(authorsData);
 });
 
+// Handle non-GET methods for authors endpoint
+app.all("/api/authors", (req, res) => {
+  res.status(405).json({ error: `Method ${req.method} not allowed for this endpoint.` });
+});
+
 // Get list of all available tags
 app.get("/api/tags", (req, res) => {
   // Use pre-loaded tagsData
   res.json(tagsData);
 });
 
+// Handle non-GET methods for tags endpoint
+app.all("/api/tags", (req, res) => {
+  res.status(405).json({ error: `Method ${req.method} not allowed for this endpoint.` });
+});
+
 // Main quote endpoint
 app.get("/api/quotes/random", (req, res) => {
-  const maxLength = req.query.maxLength ? parseInt(req.query.maxLength) : null;
-  const minLength = req.query.minLength ? parseInt(req.query.minLength) : null;
-  const tags = req.query.tags
-    ? req.query.tags.split(",").map((tag) => tag.toLowerCase())
-    : null;
-  const authors = req.query.authors ? req.query.authors.split(",") : null;
-  const count = req.query.count ? parseInt(req.query.count) : 1;
-
-  // Validate count parameter
-  if (isNaN(count) || count < 1 || count > 50) {
-    return res.status(400).json({
-      error: "Count must be a number between 1 and 50.",
-    });
+  // Validate and parse numeric parameters
+  const maxLengthValidation = validateNumericParam(req.query.maxLength, 'maxLength', 1);
+  if (maxLengthValidation && maxLengthValidation.error) {
+    return res.status(400).json({ error: maxLengthValidation.error });
   }
+  const maxLength = maxLengthValidation ? maxLengthValidation.value : null;
+
+  const minLengthValidation = validateNumericParam(req.query.minLength, 'minLength', 1);
+  if (minLengthValidation && minLengthValidation.error) {
+    return res.status(400).json({ error: minLengthValidation.error });
+  }
+  const minLength = minLengthValidation ? minLengthValidation.value : null;
+
+  const countValidation = validateNumericParam(req.query.count, 'count', 1, 50);
+  if (countValidation && countValidation.error) {
+    return res.status(400).json({ error: countValidation.error });
+  }
+  const count = countValidation ? countValidation.value : 1;
+
+  // Validate and parse string parameters
+  const tagsParam = validateStringParam(req.query.tags, 'tags');
+  const tags = tagsParam ? tagsParam.split(",").map((tag) => tag.toLowerCase().trim()).filter(Boolean) : null;
+  
+  const authorsParam = validateStringParam(req.query.authors, 'authors');
+  const authors = authorsParam ? authorsParam.split(",").map((author) => author.trim()).filter(Boolean) : null;
 
   // Validate authors only if authors parameter is provided
   if (authors) {
@@ -214,9 +269,19 @@ app.get("/api/quotes/random", (req, res) => {
   }
 });
 
+// Handle non-GET methods for quotes endpoint
+app.all("/api/quotes/random", (req, res) => {
+  res.status(405).json({ error: `Method ${req.method} not allowed for this endpoint.` });
+});
+
 // Home page route
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/index.html"));
+});
+
+// Handle 404 for API routes - this should be a catch-all for unmatched API routes
+app.use("/api", (req, res) => {
+  res.status(404).json({ error: "API endpoint not found." });
 });
 
 module.exports = app;
