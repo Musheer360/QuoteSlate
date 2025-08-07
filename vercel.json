@@ -3,103 +3,13 @@
   "builds": [
     {
       "src": "src/index.js",
-      "use": "@vercel/node",
-      "config": {
-        "maxLambdaSize": "50mb"
-      }
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/src/index.js"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/src/index.js"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/api/quotes/random",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
-        },
-        {
-          "key": "Pragma",
-          "value": "no-cache"
-        },
-        {
-          "key": "Expires",
-          "value": "0"
-        },
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, HEAD, OPTIONS"
-        }
-      ]
-    },
-    {
-      "source": "/api/(?!quotes/random).*",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=300, s-maxage=300"
-        },
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, HEAD, OPTIONS"
-        }
-      ]
-    },
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=3600"
-        }
-      ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/quotes/random",
-      "destination": "/src/index.js"
-    },
-    {
-      "source": "/api/quotes",
-      "destination": "/src/index.js"
-    },
-    {
-      "source": "/api/quotes/by-author/:author",
-      "destination": "/src/index.js"
-    },
-    {
-      "source": "/api/quotes/by-tag/:tag",
-      "destination": "/src/index.js"
-    },
-    {
-      "source": "/api/authors",
-      "destination": "/src/index.js"
-    },
-    {
-      "source": "/api/authors/paginated",
-      "destination": "/src/index.js"
-    },
-    {
-      "source": "/api/tags",
-      "destination": "/src/index.js"
+      "dest": "src/index.js"
     }
   ]
 }
