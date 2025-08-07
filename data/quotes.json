@@ -1646,6 +1646,15 @@
     ]
   },
   {
+    "id": 171,
+    "quote": "Fate is in your hands and no one elses.",
+    "author": "Byron Pulsifer",
+    "length": 39,
+    "tags": [
+      "wisdom"
+    ]
+  },
+  {
     "id": 172,
     "quote": "Self-complacency is fatal to progress.",
     "author": "Margaret Sangster",
@@ -1654,15 +1663,6 @@
       "success",
       "wisdom",
       "change"
-    ]
-  },
-  {
-    "id": 171,
-    "quote": "Fate is in your hands and no one elses.",
-    "author": "Byron Pulsifer",
-    "length": 39,
-    "tags": [
-      "wisdom"
     ]
   },
   {
@@ -1863,15 +1863,6 @@
     "length": 39,
     "tags": [
       "life"
-    ]
-  },
-  {
-    "id": 223,
-    "quote": "Believe you can and you' halfway there.",
-    "author": "Theodore Roosevelt",
-    "length": 39,
-    "tags": [
-      "inspiration"
     ]
   },
   {
@@ -2169,6 +2160,15 @@
     ]
   },
   {
+    "id": 223,
+    "quote": "Believe you can and you' halfway there.",
+    "author": "Theodore Roosevelt",
+    "length": 39,
+    "tags": [
+      "inspiration"
+    ]
+  },
+  {
     "id": 224,
     "quote": "You always succeed in producing a result.",
     "author": "Tony Robbins",
@@ -2225,15 +2225,6 @@
     "length": 41,
     "tags": [
       "happiness"
-    ]
-  },
-  {
-    "id": 255,
-    "quote": "You' never a loser until you quit trying.",
-    "author": "Mike Ditka",
-    "length": 41,
-    "tags": [
-      "wisdom"
     ]
   },
   {
@@ -2482,6 +2473,15 @@
     "length": 43,
     "tags": [
       "change"
+    ]
+  },
+  {
+    "id": 255,
+    "quote": "You' never a loser until you quit trying.",
+    "author": "Mike Ditka",
+    "length": 41,
+    "tags": [
+      "wisdom"
     ]
   },
   {
@@ -2882,6 +2882,17 @@
     ]
   },
   {
+    "id": 296,
+    "quote": "An ant on the move does more than a dozing ox.",
+    "author": "Laozi",
+    "length": 46,
+    "tags": [
+      "happiness",
+      "motivation",
+      "inspiration"
+    ]
+  },
+  {
     "id": 297,
     "quote": "Love demands infinitely less than friendship.",
     "author": "George Jean Nathan",
@@ -2992,32 +3003,21 @@
     ]
   },
   {
-    "id": 309,
-    "quote": "If you  gonna hit it, hit it until it breaks.",
-    "author": "Tooru Oikawa",
-    "length": 45,
-    "tags": [
-      "wisdom"
-    ]
-  },
-  {
-    "id": 296,
-    "quote": "An ant on the move does more than a dozing ox.",
-    "author": "Laozi",
-    "length": 46,
-    "tags": [
-      "happiness",
-      "motivation",
-      "inspiration"
-    ]
-  },
-  {
     "id": 308,
     "quote": "Life's a bore if you don't challenge yourself.",
     "author": "Yuu Nishinoya",
     "length": 46,
     "tags": [
       "life"
+    ]
+  },
+  {
+    "id": 309,
+    "quote": "If you  gonna hit it, hit it until it breaks.",
+    "author": "Tooru Oikawa",
+    "length": 45,
+    "tags": [
+      "wisdom"
     ]
   },
   {
@@ -6073,7 +6073,7 @@
     "id": 620,
     "quote": "As long as you are going to be thinking anyway, think big.",
     "author": "Donald Trump",
-    "length": 55,
+    "length": 58,
     "tags": [
       "wisdom"
     ]
@@ -6596,6 +6596,16 @@
     ]
   },
   {
+    "id": 675,
+    "quote": "Argue for your limitations, and sure enough they're yours.",
+    "author": "Richard Bach",
+    "length": 58,
+    "tags": [
+      "motivation",
+      "inspiration"
+    ]
+  },
+  {
     "id": 676,
     "quote": "A good plan today is better than a perfect plan tomorrow.",
     "author": "Unknown",
@@ -6653,16 +6663,6 @@
       "wisdom",
       "hope",
       "love"
-    ]
-  },
-  {
-    "id": 675,
-    "quote": "Argue for your limitations, and sure enough they're yours.",
-    "author": "Richard Bach",
-    "length": 58,
-    "tags": [
-      "motivation",
-      "inspiration"
     ]
   },
   {
@@ -6982,7 +6982,7 @@
     "id": 714,
     "quote": "Being weak is nothing to be ashamed of… Staying weak is.",
     "author": "Fuegoleon Vermillion",
-    "length": 58,
+    "length": 56,
     "tags": [
       "resilience"
     ]
@@ -7450,6 +7450,17 @@
     ]
   },
   {
+    "id": 762,
+    "quote": "Learning is a treasure that will follow its owner everywhere.",
+    "author": "Chinese Proverb",
+    "length": 61,
+    "tags": [
+      "wisdom",
+      "growth",
+      "knowledge"
+    ]
+  },
+  {
     "id": 763,
     "quote": "Spring is a time for rebirth and the fulfilment of new life.",
     "author": "Byron Pulsifer",
@@ -7479,17 +7490,6 @@
       "life",
       "motivation",
       "inspiration"
-    ]
-  },
-  {
-    "id": 762,
-    "quote": "Learning is a treasure that will follow its owner everywhere.",
-    "author": "Chinese Proverb",
-    "length": 61,
-    "tags": [
-      "wisdom",
-      "growth",
-      "knowledge"
     ]
   },
   {
@@ -7754,6 +7754,17 @@
     ]
   },
   {
+    "id": 792,
+    "quote": "A man's growth is seen in the successive choirs of his friends.",
+    "author": "Ralph Waldo Emerson",
+    "length": 63,
+    "tags": [
+      "success",
+      "friendship",
+      "growth"
+    ]
+  },
+  {
     "id": 793,
     "quote": "You always have two choices: your commitment versus your fear.",
     "author": "Sammy Davis Jr.",
@@ -7956,34 +7967,23 @@
     ]
   },
   {
-    "id": 814,
-    "quote": "It can't be spring if your heart is filled with past failures.",
-    "author": "Byron Pulsifer",
-    "length": 62,
-    "tags": [
-      "love",
-      "inspiration",
-      "motivation"
-    ]
-  },
-  {
-    "id": 792,
-    "quote": "A man's growth is seen in the successive choirs of his friends.",
-    "author": "Ralph Waldo Emerson",
-    "length": 63,
-    "tags": [
-      "success",
-      "friendship",
-      "growth"
-    ]
-  },
-  {
     "id": 813,
     "quote": "I'm not afraid of storms, for I'm learning how to sail my ship.",
     "author": "Louisa Alcott",
     "length": 63,
     "tags": [
       "wisdom",
+      "inspiration",
+      "motivation"
+    ]
+  },
+  {
+    "id": 814,
+    "quote": "It can't be spring if your heart is filled with past failures.",
+    "author": "Byron Pulsifer",
+    "length": 62,
+    "tags": [
+      "love",
       "inspiration",
       "motivation"
     ]
@@ -11311,6 +11311,17 @@
     ]
   },
   {
+    "id": 1146,
+    "quote": "If you win, you live. If you lose, you die. If you don't fight, you can't win.",
+    "author": "Eren",
+    "length": 78,
+    "tags": [
+      "success",
+      "life",
+      "inspiration"
+    ]
+  },
+  {
     "id": 1147,
     "quote": "There is only one success: to be able to spend your life in your own way.",
     "author": "Christopher Morley",
@@ -12885,17 +12896,6 @@
     ]
   },
   {
-    "id": 1146,
-    "quote": "If you win, you live. If you lose, you die. If you don't fight, you can't win.",
-    "author": "Eren",
-    "length": 78,
-    "tags": [
-      "success",
-      "life",
-      "inspiration"
-    ]
-  },
-  {
     "id": 1302,
     "quote": "We must learn our limits. We are all something, but none of us are everything.",
     "author": "Blaise Pascal",
@@ -13161,6 +13161,17 @@
     ]
   },
   {
+    "id": 1328,
+    "quote": "Fine words and an insinuating appearance are seldom associated with true virtue.",
+    "author": "Confucius",
+    "length": 80,
+    "tags": [
+      "happiness",
+      "integrity",
+      "motivation"
+    ]
+  },
+  {
     "id": 1329,
     "quote": "I can't listen to that much Wagner. I start getting the urge to conquer Poland.",
     "author": "Woody Allen",
@@ -13422,17 +13433,6 @@
     "length": 79,
     "tags": [
       "wisdom"
-    ]
-  },
-  {
-    "id": 1328,
-    "quote": "Fine words and an insinuating appearance are seldom associated with true virtue.",
-    "author": "Confucius",
-    "length": 80,
-    "tags": [
-      "happiness",
-      "integrity",
-      "motivation"
     ]
   },
   {
@@ -13710,6 +13710,15 @@
     "tags": [
       "motivation",
       "inspiration"
+    ]
+  },
+  {
+    "id": 1382,
+    "quote": "No one knows what the outcome will be, so choose whatever. You'll regret the least.",
+    "author": "Levi Ackerman",
+    "length": 83,
+    "tags": [
+      "resilience"
     ]
   },
   {
@@ -14291,15 +14300,6 @@
       "inspiration",
       "motivation",
       "wisdom"
-    ]
-  },
-  {
-    "id": 1382,
-    "quote": "No one knows what the outcome will be, so choose whatever. You'll regret the least.",
-    "author": "Levi Ackerman",
-    "length": 83,
-    "tags": [
-      "resilience"
     ]
   },
   {
@@ -15726,6 +15726,15 @@
     ]
   },
   {
+    "id": 1580,
+    "quote": "Everyone had to be drunk on something to keep pushing on. Everyone was a slave to something.",
+    "author": "Kenny Ackerman",
+    "length": 92,
+    "tags": [
+      "motivation"
+    ]
+  },
+  {
     "id": 1581,
     "quote": "Our most intimate friend is not he to whom we show the worst, but the best of our nature.",
     "author": "Nathaniel Hawthorne",
@@ -15929,6 +15938,15 @@
       "wisdom",
       "knowledge",
       "integrity"
+    ]
+  },
+  {
+    "id": 1601,
+    "quote": "The steeper the mountain, the harder the climb, the better the view from the finishing line.",
+    "author": "Unknown",
+    "length": 92,
+    "tags": [
+      "motivation"
     ]
   },
   {
@@ -16342,6 +16360,17 @@
     ]
   },
   {
+    "id": 1642,
+    "quote": "I never did anything worth doing by accident, nor did any of my inventions come by accident.",
+    "author": "Thomas Edison",
+    "length": 92,
+    "tags": [
+      "inspiration",
+      "motivation",
+      "creativity"
+    ]
+  },
+  {
     "id": 1643,
     "quote": "Invent your world. Surround yourself with people, color, sounds, and work that nourish you.",
     "author": "Unknown",
@@ -16381,35 +16410,6 @@
       "happiness",
       "motivation",
       "inspiration"
-    ]
-  },
-  {
-    "id": 1580,
-    "quote": "Everyone had to be drunk on something to keep pushing on. Everyone was a slave to something.",
-    "author": "Kenny Ackerman",
-    "length": 92,
-    "tags": [
-      "motivation"
-    ]
-  },
-  {
-    "id": 1601,
-    "quote": "The steeper the mountain, the harder the climb, the better the view from the finishing line.",
-    "author": "Unknown",
-    "length": 92,
-    "tags": [
-      "motivation"
-    ]
-  },
-  {
-    "id": 1642,
-    "quote": "I never did anything worth doing by accident, nor did any of my inventions come by accident.",
-    "author": "Thomas Edison",
-    "length": 92,
-    "tags": [
-      "inspiration",
-      "motivation",
-      "creativity"
     ]
   },
   {
@@ -16837,6 +16837,17 @@
     ]
   },
   {
+    "id": 1688,
+    "quote": "Let me tell you the secret that has led me to my goal: my strength lies solely in my tenacity.",
+    "author": "Louis Pasteur",
+    "length": 94,
+    "tags": [
+      "perseverance",
+      "resilience",
+      "courage"
+    ]
+  },
+  {
     "id": 1689,
     "quote": "Learn all you can from the mistakes of others. You won't have time to make them all yourself.",
     "author": "Alfred Sheinwold",
@@ -16866,17 +16877,6 @@
     "tags": [
       "inspiration",
       "motivation",
-      "courage"
-    ]
-  },
-  {
-    "id": 1688,
-    "quote": "Let me tell you the secret that has led me to my goal: my strength lies solely in my tenacity.",
-    "author": "Louis Pasteur",
-    "length": 94,
-    "tags": [
-      "perseverance",
-      "resilience",
       "courage"
     ]
   },
@@ -18487,15 +18487,6 @@
     ]
   },
   {
-    "id": 1849,
-    "quote": "We are what we think. All that we are arises with our thoughts. With our thoughts, we make the world.",
-    "author": "Buddha",
-    "length": 101,
-    "tags": [
-      "wisdom"
-    ]
-  },
-  {
     "id": 1848,
     "quote": "I'm not in this world to live up to your expectations and you're not in this world to live up to mine.",
     "author": "Bruce Lee",
@@ -18504,6 +18495,15 @@
       "life",
       "hope",
       "inspiration"
+    ]
+  },
+  {
+    "id": 1849,
+    "quote": "We are what we think. All that we are arises with our thoughts. With our thoughts, we make the world.",
+    "author": "Buddha",
+    "length": 101,
+    "tags": [
+      "wisdom"
     ]
   },
   {
@@ -18924,14 +18924,14 @@
     ]
   },
   {
-    "id": 2548,
-    "quote": "If there are humans who can bring about change, they're those who are capable of abandoning everything.",
-    "author": "Armin Arlert",
-    "length": 103,
+    "id": 1890,
+    "quote": "If they adjust to me, I have to adjust in turn. Whoever stops adjusting won't be able to continue forward.",
+    "author": "Tobio Kageyama",
+    "length": 106,
     "tags": [
+      "motivation",
       "inspiration",
-      "happiness",
-      "motivation"
+      "happiness"
     ]
   },
   {
@@ -19383,17 +19383,6 @@
     "length": 105,
     "tags": [
       "motivation"
-    ]
-  },
-  {
-    "id": 1890,
-    "quote": "If they adjust to me, I have to adjust in turn. Whoever stops adjusting won't be able to continue forward.",
-    "author": "Tobio Kageyama",
-    "length": 106,
-    "tags": [
-      "motivation",
-      "inspiration",
-      "happiness"
     ]
   },
   {
@@ -20093,6 +20082,15 @@
     ]
   },
   {
+    "id": 2000,
+    "quote": "I love my past. I love my present. I'm not ashamed of what Ive had, and I'm not sad because I have it no longer.",
+    "author": "Colette",
+    "length": 112,
+    "tags": [
+      "love"
+    ]
+  },
+  {
     "id": 2001,
     "quote": "The world isn’t perfect. But it’s there for us, doing the best it can….that’s what makes it so damn beautiful.",
     "author": "Roy Mustang",
@@ -20226,12 +20224,14 @@
     ]
   },
   {
-    "id": 2000,
-    "quote": "I love my past. I love my present. I'm not ashamed of what Ive had, and I'm not sad because I have it no longer.",
-    "author": "Colette",
-    "length": 112,
+    "id": 2014,
+    "quote": "The last ones standing are the victors. Only the strongest. If you want to be the last one standing, become strong.",
+    "author": "Tobio Kageyama",
+    "length": 115,
     "tags": [
-      "love"
+      "resilience",
+      "inspiration",
+      "motivation"
     ]
   },
   {
@@ -20770,17 +20770,6 @@
     ]
   },
   {
-    "id": 2014,
-    "quote": "The last ones standing are the victors. Only the strongest. If you want to be the last one standing, become strong.",
-    "author": "Tobio Kageyama",
-    "length": 115,
-    "tags": [
-      "resilience",
-      "inspiration",
-      "motivation"
-    ]
-  },
-  {
     "id": 2066,
     "quote": "It is very easy to forgive others their mistakes; it takes more grit to forgive them for having witnessed your own.",
     "author": "Jessamyn West",
@@ -20884,6 +20873,17 @@
       "inspiration",
       "motivation",
       "fear"
+    ]
+  },
+  {
+    "id": 2076,
+    "quote": "You may say I'm a dreamer, but I'm not the only one, I hope someday you will join us, and the world will live as one.",
+    "author": "John Lennon",
+    "length": 117,
+    "tags": [
+      "inspiration",
+      "motivation",
+      "hope"
     ]
   },
   {
@@ -21024,17 +21024,6 @@
     ]
   },
   {
-    "id": 2076,
-    "quote": "You may say I'm a dreamer, but I'm not the only one, I hope someday you will join us, and the world will live as one.",
-    "author": "John Lennon",
-    "length": 117,
-    "tags": [
-      "inspiration",
-      "motivation",
-      "hope"
-    ]
-  },
-  {
     "id": 2090,
     "quote": "There is no duty we so underrate as the duty of being happy. By being happy we sow anonymous benefits upon the world.",
     "author": "Robert Louis Stevenson",
@@ -21105,6 +21094,15 @@
     "length": 117,
     "tags": [
       "hope"
+    ]
+  },
+  {
+    "id": 2097,
+    "quote": "We're here for a reason. I believe a bit of the reason is to throw little torches out to lead people through the dark.",
+    "author": "Whoopi Goldberg",
+    "length": 118,
+    "tags": [
+      "wisdom"
     ]
   },
   {
@@ -21199,15 +21197,6 @@
     "length": 117,
     "tags": [
       "life"
-    ]
-  },
-  {
-    "id": 2097,
-    "quote": "We're here for a reason. I believe a bit of the reason is to throw little torches out to lead people through the dark.",
-    "author": "Whoopi Goldberg",
-    "length": 118,
-    "tags": [
-      "wisdom"
     ]
   },
   {
@@ -21327,6 +21316,17 @@
       "life",
       "inspiration",
       "motivation"
+    ]
+  },
+  {
+    "id": 2118,
+    "quote": "Life is a gift, and it offers us the privilege, opportunity, and responsibility to give something back by becoming more.",
+    "author": "Tony Robbins",
+    "length": 120,
+    "tags": [
+      "inspiration",
+      "motivation",
+      "life"
     ]
   },
   {
@@ -21453,17 +21453,6 @@
       "motivation",
       "happiness",
       "inspiration"
-    ]
-  },
-  {
-    "id": 2118,
-    "quote": "Life is a gift, and it offers us the privilege, opportunity, and responsibility to give something back by becoming more.",
-    "author": "Tony Robbins",
-    "length": 120,
-    "tags": [
-      "inspiration",
-      "motivation",
-      "life"
     ]
   },
   {
@@ -22202,17 +22191,6 @@
     ]
   },
   {
-    "id": 2336,
-    "quote": "If a man going down into a river, swollen and swiftly flowing, is carried away by the current — how can he help others across?",
-    "author": "Buddha",
-    "length": 126,
-    "tags": [
-      "wisdom",
-      "life",
-      "resilience"
-    ]
-  },
-  {
     "id": 2202,
     "quote": "Peace is not something you wish for. It's something you make, something you do, something you are, and something you give away.",
     "author": "Robert Fulghum",
@@ -22475,6 +22453,17 @@
     ]
   },
   {
+    "id": 2227,
+    "quote": "The greatest antidote to insecurity and the sense of fear is compassion, it brings one back to the basis of one's inner strength.",
+    "author": "Dalai Lama",
+    "length": 129,
+    "tags": [
+      "happiness",
+      "motivation",
+      "inspiration"
+    ]
+  },
+  {
     "id": 2228,
     "quote": "If I could reach up and hold a star for every time you've made me smile, the entire evening sky would be in the palm of my hand.",
     "author": "Unknown",
@@ -22511,17 +22500,6 @@
       "motivation",
       "inspiration",
       "resilience"
-    ]
-  },
-  {
-    "id": 2227,
-    "quote": "The greatest antidote to insecurity and the sense of fear is compassion, it brings one back to the basis of one's inner strength.",
-    "author": "Dalai Lama",
-    "length": 129,
-    "tags": [
-      "happiness",
-      "motivation",
-      "inspiration"
     ]
   },
   {
@@ -22920,6 +22898,17 @@
     ]
   },
   {
+    "id": 2270,
+    "quote": "People take different roads seeking fulfilment and happiness. Just because they're not on your road doesn't mean they've gotten lost.",
+    "author": "Dalai Lama",
+    "length": 133,
+    "tags": [
+      "motivation",
+      "inspiration",
+      "wisdom"
+    ]
+  },
+  {
     "id": 2271,
     "quote": "If you look at what you have in life, you’ll always have more. If you look at what you don’t have in life, you’ll never have enough.",
     "author": "Oprah Winfrey",
@@ -22929,14 +22918,14 @@
     ]
   },
   {
-    "id": 2270,
-    "quote": "People take different roads seeking fulfilment and happiness. Just because they're not on your road doesn't mean they've gotten lost.",
-    "author": "Dalai Lama",
-    "length": 133,
+    "id": 2272,
+    "quote": "You're gonna care what other people think and be someone you're not your whole life? You’re fine as you are. So, talk in your own words.",
+    "author": "Ymir",
+    "length": 136,
     "tags": [
-      "motivation",
       "inspiration",
-      "wisdom"
+      "motivation",
+      "life"
     ]
   },
   {
@@ -23228,17 +23217,6 @@
     ]
   },
   {
-    "id": 2272,
-    "quote": "You're gonna care what other people think and be someone you're not your whole life? You’re fine as you are. So, talk in your own words.",
-    "author": "Ymir",
-    "length": 136,
-    "tags": [
-      "inspiration",
-      "motivation",
-      "life"
-    ]
-  },
-  {
     "id": 2300,
     "quote": "When I dare to be powerful, to use my strength in the service of my vision, then it becomes less and less important whether I am afraid.",
     "author": "Audre Lorde",
@@ -23394,6 +23372,15 @@
     ]
   },
   {
+    "id": 2315,
+    "quote": "A lot of people give up just before they're about to make it. You know you never know when that next obstacle is going to be the last one.",
+    "author": "Chuck Norris",
+    "length": 138,
+    "tags": [
+      "wisdom"
+    ]
+  },
+  {
     "id": 2316,
     "quote": "If we had no winter, the spring would not be so pleasant; if we did not sometimes taste of adversity, prosperity would not be so welcome.",
     "author": "Anne Bradstreet",
@@ -23424,6 +23411,17 @@
       "wisdom",
       "creativity",
       "life"
+    ]
+  },
+  {
+    "id": 2319,
+    "quote": "Much though he recites the sacred texts, but acts not accordingly, that heedless man is like a cowherd who only counts the cows of others.",
+    "author": "Buddha",
+    "length": 138,
+    "tags": [
+      "inspiration",
+      "motivation",
+      "wisdom"
     ]
   },
   {
@@ -23489,23 +23487,12 @@
     ]
   },
   {
-    "id": 2315,
-    "quote": "A lot of people give up just before they're about to make it. You know you never know when that next obstacle is going to be the last one.",
-    "author": "Chuck Norris",
-    "length": 138,
+    "id": 2326,
+    "quote": "It doesn't matter how strong the opposition is. It doesn't matter how fearsome the world is, it doesn't matter how cruel the world is. Fight!",
+    "author": "Eren",
+    "length": 141,
     "tags": [
-      "wisdom"
-    ]
-  },
-  {
-    "id": 2319,
-    "quote": "Much though he recites the sacred texts, but acts not accordingly, that heedless man is like a cowherd who only counts the cows of others.",
-    "author": "Buddha",
-    "length": 138,
-    "tags": [
-      "inspiration",
-      "motivation",
-      "wisdom"
+      "resilience"
     ]
   },
   {
@@ -23598,6 +23585,17 @@
     "tags": [
       "hope",
       "wisdom",
+      "resilience"
+    ]
+  },
+  {
+    "id": 2336,
+    "quote": "If a man going down into a river, swollen and swiftly flowing, is carried away by the current — how can he help others across?",
+    "author": "Buddha",
+    "length": 126,
+    "tags": [
+      "wisdom",
+      "life",
       "resilience"
     ]
   },
@@ -23723,15 +23721,6 @@
     ]
   },
   {
-    "id": 2326,
-    "quote": "It doesn't matter how strong the opposition is. It doesn't matter how fearsome the world is, it doesn't matter how cruel the world is. Fight!",
-    "author": "Eren",
-    "length": 141,
-    "tags": [
-      "resilience"
-    ]
-  },
-  {
     "id": 2348,
     "quote": "If you don't design your own life plan, chances are you'll fall into someone else's plan. And guess what they have planned for you? Not much.",
     "author": "Jim Rohn",
@@ -23764,6 +23753,17 @@
     ]
   },
   {
+    "id": 2351,
+    "quote": "That's the risk you take if you change: that people you've been involved with won't like the new you. But other people who do will come along.",
+    "author": "Lisa Alther",
+    "length": 142,
+    "tags": [
+      "motivation",
+      "inspiration",
+      "change"
+    ]
+  },
+  {
     "id": 2352,
     "quote": "Respect is not something that you can ask for, buy or borrow. Respect is what you earn from each person no matter their background or status.",
     "author": "Byron Pulsifer",
@@ -23782,17 +23782,6 @@
       "love",
       "wisdom",
       "hope"
-    ]
-  },
-  {
-    "id": 2351,
-    "quote": "That's the risk you take if you change: that people you've been involved with won't like the new you. But other people who do will come along.",
-    "author": "Lisa Alther",
-    "length": 142,
-    "tags": [
-      "motivation",
-      "inspiration",
-      "change"
     ]
   },
   {
@@ -24944,6 +24933,17 @@
     ]
   },
   {
+    "id": 2464,
+    "quote": "I don't like the terms 'good person' or 'bad person' because it is impossible to be entirely good to everyone. To some, you are a good person, while to others, you are a bad person.",
+    "author": "Armin Arlert",
+    "length": 181,
+    "tags": [
+      "inspiration",
+      "motivation",
+      "wisdom"
+    ]
+  },
+  {
     "id": 2465,
     "quote": "Meditation is the dissolution of thoughts in eternal awareness or Pure consciousness without objectification, knowing without thinking, merging finitude in infinity.",
     "author": "Voltaire",
@@ -25121,6 +25121,15 @@
     ]
   },
   {
+    "id": 2482,
+    "quote": "You understand, don't you? One day or another, everyone you care about eventually dies. It's something we simply can't accept. It's a realization that can drive you insane.",
+    "author": "Hange Zoë",
+    "length": 172,
+    "tags": [
+      "love"
+    ]
+  },
+  {
     "id": 2483,
     "quote": "Grief can be the garden of compassion. If you keep your heart open through everything, your pain can become your greatest ally in your life's search for love and wisdom.",
     "author": "Rumi",
@@ -25254,15 +25263,6 @@
       "inspiration",
       "wisdom",
       "creativity"
-    ]
-  },
-  {
-    "id": 2482,
-    "quote": "You understand, don't you? One day or another, everyone you care about eventually dies. It's something we simply can't accept. It's a realization that can drive you insane.",
-    "author": "Hange Zoë",
-    "length": 172,
-    "tags": [
-      "love"
     ]
   },
   {
@@ -25532,17 +25532,6 @@
       "wisdom",
       "inspiration",
       "motivation"
-    ]
-  },
-  {
-    "id": 2464,
-    "quote": "I don't like the terms 'good person' or 'bad person' because it is impossible to be entirely good to everyone. To some, you are a good person, while to others, you are a bad person.",
-    "author": "Armin Arlert",
-    "length": 181,
-    "tags": [
-      "inspiration",
-      "motivation",
-      "wisdom"
     ]
   },
   {
@@ -25833,6 +25822,17 @@
       "success",
       "life",
       "wisdom"
+    ]
+  },
+  {
+    "id": 2548,
+    "quote": "If there are humans who can bring about change, they're those who are capable of abandoning everything.",
+    "author": "Armin Arlert",
+    "length": 103,
+    "tags": [
+      "inspiration",
+      "happiness",
+      "motivation"
     ]
   },
   {

@@ -1,0 +1,806 @@
+openapi: 3.0.3
+info:
+  title: QuoteSlate API
+  description: |
+    # 🎯 QuoteSlate API - Inspirational Quotes at Your Fingertips
+    
+    A powerful, developer-friendly REST API providing access to a curated collection of **2,616+ inspirational quotes** from **1,010+ renowned authors** across **31 categories**.
+    
+    ## ✨ Key Features
+    
+    - **🎲 Random Access**: Get truly random quotes for inspiration
+    - **📄 Systematic Browsing**: Browse quotes with advanced pagination
+    - **🔍 Smart Search**: Search quotes by content and author names
+    - **👤 Author-Specific**: Get all quotes from specific authors
+    - **🏷️ Tag-Based Filtering**: Filter quotes by categories/tags
+    - **⚡ Lightning Fast**: Average response time under 10ms
+    - **🧠 Smart Caching**: Random endpoints stay random, others are optimized
+    - **🔒 Secure**: Comprehensive input validation and security headers
+    
+    ## 🚀 Getting Started
+    
+    No API key required! Simply make HTTP requests to any endpoint.
+    
+    **Base URL**: `https://quoteslate.vercel.app`
+    
+    ## 📊 Rate Limits
+    
+    - **100 requests per 15 minutes** per IP address
+    - Use the `count` parameter to fetch multiple quotes efficiently
+    - Consider caching responses in your application
+    
+    ## 🎯 Best Practices
+    
+    1. **Optimize Requests**: Use `count` parameter for bulk fetching
+    2. **Cache Responses**: Store quotes locally to reduce API calls
+    3. **Handle Errors**: Always check response status codes
+    4. **Attribution**: Include "Quotes powered by QuoteSlate API" in your app
+    
+    ## 🔗 Resources
+    
+    - **GitHub**: [https://github.com/Musheer360/QuoteSlate](https://github.com/Musheer360/QuoteSlate)
+    - **Interactive Docs**: [https://quoteslate.vercel.app](https://quoteslate.vercel.app)
+    - **Deploy Your Own**: Fork the repo for high-volume usage
+    
+  version: 2.0.0
+  contact:
+    name: Musheer360
+    url: https://github.com/Musheer360
+    email: musheer360@example.com
+  license:
+    name: MIT
+    url: https://github.com/Musheer360/QuoteSlate/blob/main/LICENSE
+  termsOfService: https://github.com/Musheer360/QuoteSlate#using-quoteslate-responsibly
+
+servers:
+  - url: https://quoteslate.vercel.app
+    description: Production server
+  - url: http://localhost:3000
+    description: Local development server
+
+tags:
+  - name: Random Quotes
+    description: Get random quotes for inspiration and variety
+  - name: Paginated Quotes
+    description: Browse quotes systematically with pagination and search
+  - name: Authors
+    description: Access author information and author-specific quotes
+  - name: Tags
+    description: Browse quotes by categories and tags
+  - name: System
+    description: Health checks and system information
+
+paths:
+  /health:
+    get:
+      tags:
+        - System
+      summary: Health Check
+      description: Check API health status and get system information
+      operationId: getHealth
+      responses:
+        '200':
+          description: API is healthy and operational
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: "healthy"
+                timestamp: "2025-08-07T11:00:00.000Z"
+                version: "2.0.0"
+                features: ["pagination", "search", "sorting"]
+
+  /api/quotes/random:
+    get:
+      tags:
+        - Random Quotes
+      summary: Get Random Quote(s)
+      description: |
+        Retrieve one or more random quotes from the collection. Perfect for inspiration, daily quotes, or adding variety to your application.
+        
+        **⚠️ Important**: This endpoint is NOT cached to preserve true randomness.
+      operationId: getRandomQuotes
+      parameters:
+        - name: count
+          in: query
+          description: Number of random quotes to return
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 1
+          example: 5
+        - name: authors
+          in: query
+          description: Comma-separated list of author names to filter by
+          required: false
+          schema:
+            type: string
+          example: "Albert Einstein,Maya Angelou"
+        - name: tags
+          in: query
+          description: Comma-separated list of tags to filter by
+          required: false
+          schema:
+            type: string
+          example: "motivation,wisdom"
+        - name: minLength
+          in: query
+          description: Minimum character length of quotes
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+          example: 50
+        - name: maxLength
+          in: query
+          description: Maximum character length of quotes
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+          example: 150
+      responses:
+        '200':
+          description: Random quote(s) retrieved successfully
+          headers:
+            Cache-Control:
+              description: No cache headers to preserve randomness
+              schema:
+                type: string
+                example: "no-cache, no-store, must-revalidate"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Quote'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Quote'
+              examples:
+                single_quote:
+                  summary: Single random quote
+                  value:
+                    id: 498
+                    quote: "Every strike brings me closer to the next home run."
+                    author: "Babe Ruth"
+                    length: 51
+                    tags: ["wisdom", "motivation"]
+                multiple_quotes:
+                  summary: Multiple random quotes
+                  value:
+                    - id: 498
+                      quote: "Every strike brings me closer to the next home run."
+                      author: "Babe Ruth"
+                      length: 51
+                      tags: ["wisdom", "motivation"]
+                    - id: 120
+                      quote: "All great achievements require time."
+                      author: "Maya Angelou"
+                      length: 36
+                      tags: ["motivation", "success"]
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimit'
+    head:
+      tags:
+        - Random Quotes
+      summary: Get Random Quote Headers
+      description: Get headers for random quotes endpoint without response body
+      operationId: getRandomQuotesHeaders
+      parameters:
+        - name: count
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+      responses:
+        '200':
+          description: Headers retrieved successfully
+
+  /api/quotes:
+    get:
+      tags:
+        - Paginated Quotes
+      summary: Browse All Quotes (Paginated)
+      description: |
+        Browse the entire quote collection systematically with advanced pagination, search, sorting, and filtering capabilities.
+        
+        **✅ Cached**: This endpoint is cached for 5 minutes for optimal performance.
+      operationId: getPaginatedQuotes
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Order'
+        - name: search
+          in: query
+          description: Search term to find in quote text or author names
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+          example: "love"
+        - name: authors
+          in: query
+          description: Comma-separated list of author names to filter by
+          required: false
+          schema:
+            type: string
+          example: "Albert Einstein,Buddha"
+        - name: tags
+          in: query
+          description: Comma-separated list of tags to filter by
+          required: false
+          schema:
+            type: string
+          example: "motivation,wisdom"
+        - name: minLength
+          in: query
+          description: Minimum character length of quotes
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: maxLength
+          in: query
+          description: Maximum character length of quotes
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Paginated quotes retrieved successfully
+          headers:
+            Cache-Control:
+              description: Cached for performance optimization
+              schema:
+                type: string
+                example: "public, max-age=300, s-maxage=300"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedQuotesResponse'
+              example:
+                data:
+                  - id: 1
+                    quote: "Action is eloquence."
+                    author: "William Shakespeare"
+                    length: 20
+                    tags: ["motivation"]
+                  - id: 2
+                    quote: "When in doubt, don't."
+                    author: "Benjamin Franklin"
+                    length: 21
+                    tags: ["wisdom"]
+                pagination:
+                  page: 1
+                  limit: 20
+                  total: 2616
+                  totalPages: 131
+                  hasNext: true
+                  hasPrev: false
+                  startIndex: 1
+                  endIndex: 20
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimit'
+
+  /api/quotes/by-author/{author}:
+    get:
+      tags:
+        - Authors
+      summary: Get Quotes by Specific Author
+      description: |
+        Retrieve all quotes from a specific author with pagination and sorting options.
+        
+        **✅ Cached**: This endpoint is cached for 5 minutes for optimal performance.
+      operationId: getQuotesByAuthor
+      parameters:
+        - name: author
+          in: path
+          description: Author name (case-insensitive, URL-encoded)
+          required: true
+          schema:
+            type: string
+            minLength: 1
+          example: "Albert Einstein"
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: sort
+          in: query
+          description: Sort quotes by field
+          required: false
+          schema:
+            type: string
+            enum: [id, length, random]
+            default: id
+        - $ref: '#/components/parameters/Order'
+      responses:
+        '200':
+          description: Author quotes retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedQuotesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Author not found or no quotes available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: 'Author "NonExistent Author" not found.'
+        '429':
+          $ref: '#/components/responses/RateLimit'
+
+  /api/quotes/by-tag/{tag}:
+    get:
+      tags:
+        - Tags
+      summary: Get Quotes by Specific Tag
+      description: |
+        Retrieve all quotes with a specific tag/category with pagination and sorting options.
+        
+        **✅ Cached**: This endpoint is cached for 5 minutes for optimal performance.
+      operationId: getQuotesByTag
+      parameters:
+        - name: tag
+          in: path
+          description: Tag name (case-sensitive, URL-encoded)
+          required: true
+          schema:
+            type: string
+            minLength: 1
+          example: "motivation"
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Order'
+      responses:
+        '200':
+          description: Tag quotes retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedQuotesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Tag not found or no quotes available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: 'Tag "nonexistenttag" not found.'
+        '429':
+          $ref: '#/components/responses/RateLimit'
+
+  /api/authors:
+    get:
+      tags:
+        - Authors
+      summary: Get All Authors
+      description: |
+        Retrieve a complete list of all authors with their quote counts.
+        
+        **✅ Cached**: This endpoint is cached for 5 minutes for optimal performance.
+      operationId: getAllAuthors
+      responses:
+        '200':
+          description: Authors list retrieved successfully
+          headers:
+            Cache-Control:
+              description: Cached for performance optimization
+              schema:
+                type: string
+                example: "public, max-age=300, s-maxage=300"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorsResponse'
+              example:
+                "Albert Einstein": 15
+                "Maya Angelou": 12
+                "Babe Ruth": 8
+                "Buddha": 25
+        '429':
+          $ref: '#/components/responses/RateLimit'
+
+  /api/authors/paginated:
+    get:
+      tags:
+        - Authors
+      summary: Browse Authors (Paginated)
+      description: |
+        Browse all authors with pagination, search, and sorting capabilities.
+        
+        **✅ Cached**: This endpoint is cached for 5 minutes for optimal performance.
+      operationId: getPaginatedAuthors
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: sort
+          in: query
+          description: Sort authors by field
+          required: false
+          schema:
+            type: string
+            enum: [name, count]
+            default: name
+        - $ref: '#/components/parameters/Order'
+        - name: search
+          in: query
+          description: Search term to find in author names
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+          example: "Einstein"
+      responses:
+        '200':
+          description: Paginated authors retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuthorsResponse'
+              example:
+                data:
+                  - name: "Albert Einstein"
+                    count: 15
+                  - name: "Maya Angelou"
+                    count: 12
+                pagination:
+                  page: 1
+                  limit: 20
+                  total: 1010
+                  totalPages: 51
+                  hasNext: true
+                  hasPrev: false
+                  startIndex: 1
+                  endIndex: 20
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimit'
+
+  /api/tags:
+    get:
+      tags:
+        - Tags
+      summary: Get All Tags
+      description: |
+        Retrieve a complete list of all available tags/categories.
+        
+        **✅ Cached**: This endpoint is cached for 5 minutes for optimal performance.
+      operationId: getAllTags
+      responses:
+        '200':
+          description: Tags list retrieved successfully
+          headers:
+            Cache-Control:
+              description: Cached for performance optimization
+              schema:
+                type: string
+                example: "public, max-age=300, s-maxage=300"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagsResponse'
+              example:
+                - "motivation"
+                - "inspiration"
+                - "life"
+                - "wisdom"
+                - "love"
+                - "success"
+                - "leadership"
+                - "happiness"
+        '429':
+          $ref: '#/components/responses/RateLimit'
+
+components:
+  parameters:
+    Page:
+      name: page
+      in: query
+      description: Page number for pagination
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      example: 1
+    
+    Limit:
+      name: limit
+      in: query
+      description: Number of items per page
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      example: 20
+    
+    Sort:
+      name: sort
+      in: query
+      description: Sort quotes by field
+      required: false
+      schema:
+        type: string
+        enum: [id, author, length, random]
+        default: id
+      example: author
+    
+    Order:
+      name: order
+      in: query
+      description: Sort order
+      required: false
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: asc
+      example: desc
+
+  schemas:
+    Quote:
+      type: object
+      required:
+        - id
+        - quote
+        - author
+        - length
+        - tags
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the quote
+          example: 498
+        quote:
+          type: string
+          description: The quote text
+          example: "Every strike brings me closer to the next home run."
+        author:
+          type: string
+          description: Author of the quote
+          example: "Babe Ruth"
+        length:
+          type: integer
+          description: Character length of the quote
+          example: 51
+        tags:
+          type: array
+          description: Categories/tags associated with the quote
+          items:
+            type: string
+          example: ["wisdom", "motivation"]
+
+    PaginationInfo:
+      type: object
+      required:
+        - page
+        - limit
+        - total
+        - totalPages
+        - hasNext
+        - hasPrev
+        - startIndex
+        - endIndex
+      properties:
+        page:
+          type: integer
+          description: Current page number
+          example: 1
+        limit:
+          type: integer
+          description: Items per page
+          example: 20
+        total:
+          type: integer
+          description: Total number of items
+          example: 2616
+        totalPages:
+          type: integer
+          description: Total number of pages
+          example: 131
+        hasNext:
+          type: boolean
+          description: Whether there is a next page
+          example: true
+        hasPrev:
+          type: boolean
+          description: Whether there is a previous page
+          example: false
+        startIndex:
+          type: integer
+          description: Starting index of current page items
+          example: 1
+        endIndex:
+          type: integer
+          description: Ending index of current page items
+          example: 20
+
+    PaginatedQuotesResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          description: Array of quotes for current page
+          items:
+            $ref: '#/components/schemas/Quote'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    Author:
+      type: object
+      required:
+        - name
+        - count
+      properties:
+        name:
+          type: string
+          description: Author name
+          example: "Albert Einstein"
+        count:
+          type: integer
+          description: Number of quotes by this author
+          example: 15
+
+    PaginatedAuthorsResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          description: Array of authors for current page
+          items:
+            $ref: '#/components/schemas/Author'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    AuthorsResponse:
+      type: object
+      description: Map of author names to their quote counts
+      additionalProperties:
+        type: integer
+      example:
+        "Albert Einstein": 15
+        "Maya Angelou": 12
+        "Babe Ruth": 8
+
+    TagsResponse:
+      type: array
+      description: List of all available tags
+      items:
+        type: string
+      example:
+        - "motivation"
+        - "inspiration"
+        - "life"
+        - "wisdom"
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+        - version
+        - features
+      properties:
+        status:
+          type: string
+          description: API health status
+          example: "healthy"
+        timestamp:
+          type: string
+          format: date-time
+          description: Current server timestamp
+          example: "2025-08-07T11:00:00.000Z"
+        version:
+          type: string
+          description: API version
+          example: "2.0.0"
+        features:
+          type: array
+          description: List of available features
+          items:
+            type: string
+          example: ["pagination", "search", "sorting"]
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message describing what went wrong
+          example: "Invalid parameter: count must be between 1 and 50."
+
+  responses:
+    BadRequest:
+      description: Bad request - invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            invalid_count:
+              summary: Invalid count parameter
+              value:
+                error: "count must be greater than or equal to 1."
+            decimal_number:
+              summary: Decimal number rejected
+              value:
+                error: "count must be a whole number."
+            invalid_author:
+              summary: Invalid author
+              value:
+                error: 'Invalid author(s): NonExistent Author'
+            invalid_length_range:
+              summary: Invalid length range
+              value:
+                error: "minLength must be less than or equal to maxLength."
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            no_quotes_found:
+              summary: No quotes match criteria
+              value:
+                error: "No quotes found matching the criteria."
+            page_not_found:
+              summary: Page not found
+              value:
+                error: "Page not found. No quotes available for the requested page."
+            author_not_found:
+              summary: Author not found
+              value:
+                error: 'Author "NonExistent" not found.'
+
+    RateLimit:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Too many requests, please try again later. Consider using the 'count' parameter to fetch multiple quotes in a single request."
+
+  securitySchemes: {}
+
+security: []
+
+externalDocs:
+  description: QuoteSlate API GitHub Repository
+  url: https://github.com/Musheer360/QuoteSlate

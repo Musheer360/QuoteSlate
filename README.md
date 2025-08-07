@@ -72,9 +72,14 @@ I appreciate your understanding and cooperation in making the QuoteSlate API a v
 ### Core Functionality
 
 -   🎲 **Random Quote Generation**: Fetch random quotes from a diverse collection
--   📦 **Bulk Retrieval**: Get up to 50 quotes in a single request
+-   📄 **Systematic Browsing**: Browse all quotes with pagination support
+-   🔍 **Advanced Search Functionality**: Search quotes by content and author names
+-   📦 **Bulk Retrieval**: Get up to 50 random quotes or 100 paginated quotes in a single request
 -   🔍 **Advanced Filtering**: Filter quotes by author, length, and tags
 -   📊 **Metadata Access**: Retrieve complete lists of authors and tags
+-   👤 **Author-Specific Access**: Get all quotes from specific authors with pagination
+-   🏷️ **Tag-Specific Access**: Get all quotes with specific tags with pagination
+-   🔄 **Flexible Sorting Capabilities**: Sort by ID, author, length, or random order
 -   🔄 **Real-time Updates**: Regular updates to the quote database
 
 ### Technical Features
@@ -82,10 +87,11 @@ I appreciate your understanding and cooperation in making the QuoteSlate API a v
 -   ⚡ **High Performance**: Optimized for quick response times
 -   🛡️ **Rate Limiting**: 100 requests per 15 minutes per IP
 -   🌐 **CORS Support**: Access from any origin
--   🔒 **Input Validation**: Robust parameter validation
+-   🔒 **Input Validation**: Robust parameter validation with decimal rejection
 -   📝 **Detailed Error Messages**: Clear, actionable error responses
 -   🔄 **RESTful Architecture**: Clean, predictable API endpoints
 -   📖 **Open Source**: Fully transparent and community-driven
+-   🔄 **Backward Compatible**: All original endpoints preserved
 
 ## Getting Started
 
@@ -204,17 +210,106 @@ Ensure your JSON files follow these formats:
 ["motivation", "wisdom", "life"]
 ```
 
+## 📖 API Documentation
+
+### Interactive Documentation
+
+QuoteSlate provides comprehensive OpenAPI 3.0 documentation with interactive testing capabilities:
+
+- **🌐 Interactive Docs**: [https://quoteslate.vercel.app/docs](https://quoteslate.vercel.app/docs)
+- **📄 OpenAPI Spec**: [https://quoteslate.vercel.app/openapi.yaml](https://quoteslate.vercel.app/openapi.yaml)
+- **🎯 Try It Live**: Test all endpoints directly in the browser
+
+### OpenAPI Features
+
+- **Complete API Coverage**: All 7 endpoints fully documented
+- **Interactive Testing**: Try endpoints with real data
+- **Request/Response Examples**: Comprehensive examples for all scenarios
+- **Parameter Validation**: Detailed parameter constraints and validation rules
+- **Error Documentation**: All possible error responses with examples
+- **Performance Metrics**: Response time expectations and caching information
+- **Authentication**: No API key required - completely open access
+
+### Documentation Highlights
+
+- **📊 Real Statistics**: 2,616+ quotes, 1,010+ authors, 31 categories
+- **⚡ Performance Info**: Average response times under 10ms
+- **🧠 Smart Caching**: Detailed caching strategy explanation
+- **🔒 Security**: Comprehensive security headers documentation
+- **📱 Mobile Friendly**: Responsive documentation interface
+
 ## API Reference
 
 ### Endpoints
 
-#### 1. Random Quotes
+#### 1. Random Quotes (Original)
 
 ```http
 GET /api/quotes/random
 ```
 
-#### 2. Author List
+#### 2. Browse All Quotes (New - Paginated)
+
+```http
+GET /api/quotes
+```
+
+Browse all quotes systematically with pagination, search, sorting, and filtering.
+
+**Parameters:**
+- `page` (integer, default: 1) - Page number
+- `limit` (integer, default: 20, max: 100) - Items per page
+- `sort` (string) - Sort by: `id`, `author`, `length`, `random`
+- `order` (string) - Sort order: `asc`, `desc`
+- `search` (string) - Search in quote text and author names
+- Plus all filtering parameters from random endpoint
+
+**Response Format:**
+```json
+{
+  "data": [...],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 2616,
+    "totalPages": 131,
+    "hasNext": true,
+    "hasPrev": false,
+    "startIndex": 1,
+    "endIndex": 20
+  }
+}
+```
+
+#### 3. Quotes by Author (New - Paginated)
+
+```http
+GET /api/quotes/by-author/:author
+```
+
+Get all quotes from a specific author with pagination.
+
+**Parameters:**
+- `page` (integer, default: 1) - Page number
+- `limit` (integer, default: 20, max: 100) - Items per page
+- `sort` (string) - Sort by: `id`, `length`, `random`
+- `order` (string) - Sort order: `asc`, `desc`
+
+#### 4. Quotes by Tag (New - Paginated)
+
+```http
+GET /api/quotes/by-tag/:tag
+```
+
+Get all quotes with a specific tag with pagination.
+
+**Parameters:**
+- `page` (integer, default: 1) - Page number
+- `limit` (integer, default: 20, max: 100) - Items per page
+- `sort` (string) - Sort by: `id`, `author`, `length`, `random`
+- `order` (string) - Sort order: `asc`, `desc`
+
+#### 5. Author List (Original)
 
 ```http
 GET /api/authors
@@ -231,7 +326,42 @@ Response format:
 }
 ```
 
-#### 3. Tags List
+#### 6. Authors List (New - Paginated)
+
+```http
+GET /api/authors/paginated
+```
+
+Browse authors with pagination and search.
+
+**Parameters:**
+- `page` (integer, default: 1) - Page number
+- `limit` (integer, default: 20, max: 100) - Items per page
+- `sort` (string) - Sort by: `name`, `count`
+- `order` (string) - Sort order: `asc`, `desc`
+- `search` (string) - Search author names
+
+**Response Format:**
+```json
+{
+  "data": [
+    {
+      "name": "Albert Einstein",
+      "count": 15
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1010,
+    "totalPages": 51,
+    "hasNext": true,
+    "hasPrev": false
+  }
+}
+```
+
+#### 7. Tags List
 
 ```http
 GET /api/tags
@@ -251,6 +381,8 @@ Response format:
 
 ### Parameters
 
+#### Random Quotes Endpoint Parameters
+
 | Parameter   | Type     | Description                                          | Example                    |
 | ----------- | -------- | ---------------------------------------------------- | -------------------------- |
 | `authors`   | string   | Comma-separated list of author names                 | `authors=Babe%20Ruth,Ayn%20Rand` |
@@ -258,6 +390,26 @@ Response format:
 | `maxLength` | integer  | Maximum character length of quotes                   | `maxLength=150`            |
 | `minLength` | integer  | Minimum character length of quotes                   | `minLength=50`             |
 | `tags`      | string   | Comma-separated list of tags                         | `tags=motivation,wisdom`    |
+
+#### Pagination Parameters (New Endpoints)
+
+| Parameter   | Type     | Description                                          | Example                    |
+| ----------- | -------- | ---------------------------------------------------- | -------------------------- |
+| `page`      | integer  | Page number (default: 1)                            | `page=2`                   |
+| `limit`     | integer  | Items per page (default: 20, max: 100)              | `limit=50`                 |
+| `sort`      | string   | Sort by: `id`, `author`, `length`, `random`          | `sort=author`              |
+| `order`     | string   | Sort order: `asc`, `desc` (default: asc)            | `order=desc`               |
+| `search`    | string   | Search in quote text and author names               | `search=love`              |
+
+#### Validation Rules
+
+- All numeric parameters must be whole numbers (decimals rejected)
+- Empty string parameters are rejected with clear error messages
+- Page numbers must be ≥ 1
+- Limit must be between 1 and 100
+- Author names are case-insensitive
+- Tag names are case-sensitive
+- Invalid authors/tags return 404 with descriptive errors
 
 ### Response Format
 
@@ -297,7 +449,7 @@ Response format:
 
 ## Usage Examples
 
-### Basic Examples
+### Random Access (Original Endpoints)
 
 1. **Single Random Quote**
     
@@ -310,32 +462,99 @@ Response format:
     ```http
     GET /api/quotes/random?count=5
     ```
-    
-### Advanced Filtering
 
-1. **Quotes by Specific Authors**
+3. **Random Quotes with Filtering**
     
     ```http
     GET /api/quotes/random?authors=Babe%20Ruth,Maya%20Angelou&count=3
-    ```
-    
-2. **Quotes with Specific Tags**
-    
-    ```http
     GET /api/quotes/random?tags=motivation,wisdom&count=2
-    ```
-    
-3. **Length-Constrained Quotes**
-    
-    ```http
     GET /api/quotes/random?minLength=50&maxLength=150
-    ```
-    
-4. **Combined Filters**
-    
-    ```http
     GET /api/quotes/random?authors=Babe%20Ruth&tags=wisdom&count=3&minLength=50
     ```
+
+### Systematic Browsing (New Pagination Endpoints)
+
+1. **Browse All Quotes**
+    
+    ```http
+    # Basic pagination
+    GET /api/quotes?page=1&limit=20
+    
+    # Search quotes
+    GET /api/quotes?search=love&page=1&limit=10
+    
+    # Sort by length (longest first)
+    GET /api/quotes?sort=length&order=desc&page=1&limit=5
+    
+    # Filter and paginate
+    GET /api/quotes?authors=Albert%20Einstein&tags=wisdom&page=1&limit=10
+    ```
+
+2. **Browse Quotes by Specific Author**
+    
+    ```http
+    # Get Einstein's quotes
+    GET /api/quotes/by-author/Albert%20Einstein?page=1&limit=10
+    
+    # Sort by length
+    GET /api/quotes/by-author/Buddha?sort=length&order=asc&page=1&limit=5
+    
+    # Random order
+    GET /api/quotes/by-author/William%20Shakespeare?sort=random&page=1&limit=3
+    ```
+
+3. **Browse Quotes by Specific Tag**
+    
+    ```http
+    # Get motivation quotes
+    GET /api/quotes/by-tag/motivation?page=1&limit=15
+    
+    # Sort by author
+    GET /api/quotes/by-tag/wisdom?sort=author&order=asc&page=1&limit=10
+    
+    # Random wisdom quotes
+    GET /api/quotes/by-tag/wisdom?sort=random&page=1&limit=10
+    ```
+
+4. **Browse Authors**
+    
+    ```http
+    # Browse all authors
+    GET /api/authors/paginated?page=1&limit=50
+    
+    # Search authors
+    GET /api/authors/paginated?search=Einstein&page=1&limit=10
+    
+    # Authors with most quotes
+    GET /api/authors/paginated?sort=count&order=desc&page=1&limit=20
+    ```
+
+### JavaScript Examples
+
+```javascript
+// Random quote
+fetch('/api/quotes/random')
+  .then(response => response.json())
+  .then(data => console.log(data));
+
+// Browse quotes with pagination
+fetch('/api/quotes?page=1&limit=10&sort=author')
+  .then(response => response.json())
+  .then(data => {
+    console.log('Quotes:', data.data);
+    console.log('Pagination:', data.pagination);
+  });
+
+// Search quotes
+fetch('/api/quotes?search=love&page=1&limit=5')
+  .then(response => response.json())
+  .then(data => console.log(data));
+
+// Get author's quotes
+fetch('/api/quotes/by-author/Albert%20Einstein?page=1&limit=5')
+  .then(response => response.json())
+  .then(data => console.log(data));
+```
 
 ## Error Handling
 
@@ -380,6 +599,44 @@ Response format:
     ```json
     {
       "error": "Count must be a number between 1 and 50."
+    }
+    ```
+
+-   Decimal number rejection:
+    
+    ```json
+    {
+      "error": "count must be a whole number."
+    }
+    ```
+
+-   Empty parameter:
+    
+    ```json
+    {
+      "error": "authors cannot be empty."
+    }
+    ```
+
+-   Pagination errors:
+    
+    ```json
+    {
+      "error": "page must be greater than or equal to 1."
+    }
+    ```
+    
+    ```json
+    {
+      "error": "Page not found. No quotes available for the requested page."
+    }
+    ```
+
+-   Author/tag not found:
+    
+    ```json
+    {
+      "error": "Author \"NonExistent\" not found."
     }
     ```
 

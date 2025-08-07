@@ -5,67 +5,199 @@ const fs = require("fs");
 const rateLimit = require("express-rate-limit");
 const app = express();
 
-// Trust the proxy to get the real client IP
+// Trust the proxy to get the real client IP (important for Vercel)
 app.set("trust proxy", 1);
 
-// Enable CORS for all routes
-app.use(cors());
+// Handle OPTIONS method FIRST, before CORS middleware
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Max-Age', '86400');
+    res.status(200).end();
+    return;
+  }
+  next();
+});
 
-// Add security headers
+// Enable CORS for all routes with optimized settings
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'HEAD', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+  maxAge: 86400 // 24 hours
+}));
+
+// Add security headers with smart caching optimization
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
+  
+  // Smart caching: NO cache for random endpoints, cache for others
+  if (req.path.startsWith('/api/')) {
+    if (req.path.includes('/random')) {
+      // Random endpoints should NEVER be cached
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    } else {
+      // Other API endpoints can be cached (authors, tags, paginated results)
+      res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300'); // 5 minutes
+    }
+  } else {
+    res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour for static content
+  }
+  
   next();
 });
 
-// Add IP logging middleware
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] Request from IP: ${req.ip}`);
-  next();
-});
-
-// Rate limiter configuration
+// Optimized rate limiter for Vercel
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per windowMs
   standardHeaders: true,
   legacyHeaders: false,
   message: {
-    error: "Too many requests, please try again later.",
+    error: "Too many requests, please try again later. Consider using the 'count' parameter to fetch multiple quotes in a single request.",
   },
+  skip: (req) => {
+    // Skip rate limiting for static files and health checks
+    return req.path === '/' || req.path.startsWith('/favicon') || req.path.startsWith('/robots');
+  }
 });
 
 // Apply rate limiting to all API routes
 app.use("/api/", apiLimiter);
 
-// Load quotes data
-const quotesData = JSON.parse(
-  fs.readFileSync(path.join(__dirname, "../data/quotes.json"), "utf8"),
-);
+// Lazy load data to improve cold start performance
+let quotesData, authorsData, tagsData, authorMap, validTagsSet;
 
-// Load authors data
-const authorsData = JSON.parse(
-  fs.readFileSync(path.join(__dirname, "../data/authors.json"), "utf8"),
-);
+function loadData() {
+  if (!quotesData) {
+    console.log('Loading data...');
+    quotesData = JSON.parse(
+      fs.readFileSync(path.join(__dirname, "../data/quotes.json"), "utf8"),
+    );
+    
+    authorsData = JSON.parse(
+      fs.readFileSync(path.join(__dirname, "../data/authors.json"), "utf8"),
+    );
+    
+    tagsData = JSON.parse(
+      fs.readFileSync(path.join(__dirname, "../data/tags.json"), "utf8"),
+    );
 
-// Load tags data
-const tagsData = JSON.parse(
-  fs.readFileSync(path.join(__dirname, "../data/tags.json"), "utf8"),
-);
+    // Pre-compute maps for efficient lookup
+    authorMap = {};
+    Object.keys(authorsData).forEach((author) => {
+      authorMap[author.toLowerCase()] = author;
+    });
 
-// Pre-compute authorMap for efficient lookup
-const authorMap = {};
-Object.keys(authorsData).forEach((author) => {
-  authorMap[author.toLowerCase()] = author;
-});
+    validTagsSet = new Set(tagsData);
+    console.log(`Data loaded: ${quotesData.length} quotes, ${Object.keys(authorsData).length} authors, ${tagsData.length} tags`);
+  }
+}
 
-// Pre-compute validTagsSet for efficient lookup
-const validTagsSet = new Set(tagsData);
+// Helper function to validate pagination parameters
+function validatePaginationParams(page, limit) {
+  const pageValidation = validateNumericParam(page, 'page', 1);
+  if (pageValidation && pageValidation.error) {
+    return { error: pageValidation.error };
+  }
+  const pageNum = pageValidation ? pageValidation.value : 1;
 
-// Helper function to validate numeric parameter
+  const limitValidation = validateNumericParam(limit, 'limit', 1, 100);
+  if (limitValidation && limitValidation.error) {
+    return { error: limitValidation.error };
+  }
+  const limitNum = limitValidation ? limitValidation.value : 20;
+
+  return { page: pageNum, limit: limitNum };
+}
+
+// Helper function to create pagination response
+function createPaginatedResponse(data, page, limit, total) {
+  const totalPages = Math.ceil(total / limit);
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+  const paginatedData = data.slice(startIndex, endIndex);
+
+  return {
+    data: paginatedData,
+    pagination: {
+      page: page,
+      limit: limit,
+      total: total,
+      totalPages: totalPages,
+      hasNext: page < totalPages,
+      hasPrev: page > 1,
+      startIndex: startIndex + 1,
+      endIndex: Math.min(endIndex, total)
+    }
+  };
+}
+
+// Optimized sorting function with memoization
+const sortCache = new Map();
+function sortQuotes(quotes, sort = 'id', order = 'asc') {
+  const cacheKey = `${quotes.length}-${sort}-${order}`;
+  
+  if (sort === 'random') {
+    // Don't cache random sorts
+    const sortedQuotes = [...quotes];
+    for (let i = sortedQuotes.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [sortedQuotes[i], sortedQuotes[j]] = [sortedQuotes[j], sortedQuotes[i]];
+    }
+    return sortedQuotes;
+  }
+
+  if (sortCache.has(cacheKey)) {
+    return sortCache.get(cacheKey);
+  }
+
+  const sortedQuotes = [...quotes];
+  
+  switch (sort) {
+    case 'author':
+      sortedQuotes.sort((a, b) => a.author.localeCompare(b.author));
+      break;
+    case 'length':
+      sortedQuotes.sort((a, b) => a.length - b.length);
+      break;
+    case 'id':
+    default:
+      sortedQuotes.sort((a, b) => a.id - b.id);
+      break;
+  }
+
+  if (order === 'desc') {
+    sortedQuotes.reverse();
+  }
+
+  // Cache the result (limit cache size)
+  if (sortCache.size > 50) {
+    const firstKey = sortCache.keys().next().value;
+    sortCache.delete(firstKey);
+  }
+  sortCache.set(cacheKey, sortedQuotes);
+
+  return sortedQuotes;
+}
+
+// Enhanced validation functions (same as before but with better error messages)
 function validateNumericParam(value, paramName, min = null, max = null) {
   if (value === null || value === undefined) return null;
+  
+  if (typeof value === 'string' && value.trim() === '') {
+    return { error: `${paramName} cannot be empty.` };
+  }
+  
+  if (typeof value === 'string' && value.includes('.')) {
+    return { error: `${paramName} must be a whole number.` };
+  }
   
   const num = parseInt(value);
   if (isNaN(num)) {
@@ -83,18 +215,35 @@ function validateNumericParam(value, paramName, min = null, max = null) {
   return { value: num };
 }
 
-// Helper function to normalize author names
 function normalizeAuthorName(author) {
   return decodeURIComponent(author).trim().toLowerCase();
 }
 
-// Helper function to validate and sanitize string parameters
 function validateStringParam(value, paramName) {
-  if (!value || value.trim() === '') return null;
-  return value.trim();
+  if (!value) return null;
+  
+  const trimmed = value.trim();
+  if (trimmed === '') {
+    return { error: `${paramName} cannot be empty.` };
+  }
+  
+  // For search parameters, allow more characters but sanitize dangerous ones
+  if (paramName === 'search') {
+    // Allow common punctuation and special characters for search
+    // Only remove potentially dangerous characters for XSS prevention
+    const sanitized = trimmed.replace(/[<>\"']/g, '');
+    return { value: sanitized };
+  }
+  
+  // For other parameters, be more restrictive
+  const sanitized = trimmed.replace(/[<>\"'&]/g, '');
+  if (sanitized !== trimmed) {
+    return { error: `${paramName} contains invalid characters.` };
+  }
+  
+  return { value: trimmed };
 }
 
-// Helper function to check if a quote's author matches any of the requested authors
 function hasMatchingAuthor(quote, requestedAuthors) {
   if (!requestedAuthors) return true;
   const quoteAuthor = normalizeAuthorName(quote.author);
@@ -103,14 +252,13 @@ function hasMatchingAuthor(quote, requestedAuthors) {
   );
 }
 
-// Helper function to check if a quote matches all requested tags
 function hasMatchingTags(quote, requestedTags) {
   if (!requestedTags) return true;
   const quoteTags = new Set(quote.tags);
   return requestedTags.every((tag) => quoteTags.has(tag));
 }
 
-// Main quote retrieval function
+// Optimized quote retrieval function
 function getQuotes({
   maxLength = null,
   minLength = null,
@@ -118,38 +266,32 @@ function getQuotes({
   count = 1,
   authors = null,
 } = {}) {
-  let validQuotes = [...quotesData];
+  loadData(); // Ensure data is loaded
+  
+  let validQuotes = quotesData; // Use reference instead of spread for better performance
 
-  // Filter by authors if provided
-  if (authors) {
-    validQuotes = validQuotes.filter((quote) =>
-      hasMatchingAuthor(quote, authors),
-    );
+  // Apply filters efficiently
+  if (authors || tags || minLength !== null || maxLength !== null) {
+    validQuotes = quotesData.filter((quote) => {
+      if (authors && !hasMatchingAuthor(quote, authors)) return false;
+      if (tags && !hasMatchingTags(quote, tags)) return false;
+      if (minLength !== null && quote.length < minLength) return false;
+      if (maxLength !== null && quote.length > maxLength) return false;
+      return true;
+    });
   }
 
-  // Filter by tags if provided
-  if (tags) {
-    validQuotes = validQuotes.filter((quote) => hasMatchingTags(quote, tags));
-  }
-
-  // Apply length filters
-  if (minLength !== null) {
-    validQuotes = validQuotes.filter((quote) => quote.length >= minLength);
-  }
-
-  if (maxLength !== null) {
-    validQuotes = validQuotes.filter((quote) => quote.length <= maxLength);
-  }
-
-  // If no quotes match the criteria after all filters, return null
   if (validQuotes.length === 0) {
     return null;
   }
 
-  // If requesting more quotes than available, return all available quotes
   count = Math.min(count, validQuotes.length);
 
-  // Get random quotes
+  // Optimized random selection
+  if (count === 1) {
+    return [validQuotes[Math.floor(Math.random() * validQuotes.length)]];
+  }
+
   const quotes = [];
   const tempQuotes = [...validQuotes];
 
@@ -162,31 +304,311 @@ function getQuotes({
   return quotes;
 }
 
-// Get list of all available authors with their quote counts
-app.get("/api/authors", (req, res) => {
-  // Use pre-loaded authorsData
-  res.json(authorsData);
+// Health check endpoint for monitoring
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'healthy', 
+    timestamp: new Date().toISOString(),
+    version: '2.0.0',
+    features: ['pagination', 'search', 'sorting']
+  });
 });
 
-// Handle non-GET methods for authors endpoint
-app.all("/api/authors", (req, res) => {
-  res.status(405).json({ error: `Method ${req.method} not allowed for this endpoint.` });
+// NEW PAGINATED ENDPOINTS (optimized)
+
+// Get all quotes with pagination
+app.get("/api/quotes", (req, res) => {
+  loadData();
+  
+  const paginationValidation = validatePaginationParams(req.query.page, req.query.limit);
+  if (paginationValidation.error) {
+    return res.status(400).json({ error: paginationValidation.error });
+  }
+  const { page, limit } = paginationValidation;
+
+  const validSorts = ['id', 'author', 'length', 'random'];
+  const sort = req.query.sort && validSorts.includes(req.query.sort) ? req.query.sort : 'id';
+  const order = req.query.order === 'desc' ? 'desc' : 'asc';
+
+  let filteredQuotes = quotesData;
+
+  // Apply filters and search
+  let tags = null;
+  let authors = null;
+  let searchTerm = null;
+
+  if (req.query.tags !== undefined) {
+    const tagsValidation = validateStringParam(req.query.tags, 'tags');
+    if (tagsValidation && tagsValidation.error) {
+      return res.status(400).json({ error: tagsValidation.error });
+    }
+    if (tagsValidation) {
+      tags = tagsValidation.value.split(",").map((tag) => tag.toLowerCase().trim()).filter(Boolean);
+    }
+  }
+
+  if (req.query.authors !== undefined) {
+    const authorsValidation = validateStringParam(req.query.authors, 'authors');
+    if (authorsValidation && authorsValidation.error) {
+      return res.status(400).json({ error: authorsValidation.error });
+    }
+    if (authorsValidation) {
+      authors = authorsValidation.value.split(",").map((author) => author.trim()).filter(Boolean);
+    }
+  }
+
+  if (req.query.search !== undefined) {
+    const searchValidation = validateStringParam(req.query.search, 'search');
+    if (searchValidation && searchValidation.error) {
+      return res.status(400).json({ error: searchValidation.error });
+    }
+    if (searchValidation) {
+      searchTerm = searchValidation.value.toLowerCase();
+    }
+  }
+
+  const maxLengthValidation = validateNumericParam(req.query.maxLength, 'maxLength', 1);
+  if (maxLengthValidation && maxLengthValidation.error) {
+    return res.status(400).json({ error: maxLengthValidation.error });
+  }
+  const maxLength = maxLengthValidation ? maxLengthValidation.value : null;
+
+  const minLengthValidation = validateNumericParam(req.query.minLength, 'minLength', 1);
+  if (minLengthValidation && minLengthValidation.error) {
+    return res.status(400).json({ error: minLengthValidation.error });
+  }
+  const minLength = minLengthValidation ? minLengthValidation.value : null;
+
+  // Validate authors and tags
+  if (authors) {
+    const processedAuthors = [];
+    const invalidAuthors = [];
+
+    authors.forEach((author) => {
+      const lowercaseAuthor = author.toLowerCase();
+      if (authorMap[lowercaseAuthor]) {
+        processedAuthors.push(authorMap[lowercaseAuthor]);
+      } else {
+        invalidAuthors.push(author);
+      }
+    });
+
+    if (invalidAuthors.length > 0) {
+      return res.status(400).json({
+        error: `Invalid author(s): ${invalidAuthors.join(", ")}`,
+      });
+    }
+
+    authors.splice(0, authors.length, ...processedAuthors);
+  }
+
+  if (tags) {
+    const invalidTags = tags.filter((tag) => !validTagsSet.has(tag));
+    if (invalidTags.length > 0) {
+      return res.status(400).json({
+        error: `Invalid tag(s): ${invalidTags.join(", ")}`,
+      });
+    }
+  }
+
+  if (minLength !== null && maxLength !== null && minLength > maxLength) {
+    return res.status(400).json({
+      error: "minLength must be less than or equal to maxLength.",
+    });
+  }
+
+  // Apply filters efficiently
+  if (authors || tags || minLength !== null || maxLength !== null || searchTerm) {
+    filteredQuotes = quotesData.filter((quote) => {
+      if (authors && !hasMatchingAuthor(quote, authors)) return false;
+      if (tags && !hasMatchingTags(quote, tags)) return false;
+      if (minLength !== null && quote.length < minLength) return false;
+      if (maxLength !== null && quote.length > maxLength) return false;
+      if (searchTerm && 
+          !quote.quote.toLowerCase().includes(searchTerm) && 
+          !quote.author.toLowerCase().includes(searchTerm)) return false;
+      return true;
+    });
+  }
+
+  const sortedQuotes = sortQuotes(filteredQuotes, sort, order);
+  const response = createPaginatedResponse(sortedQuotes, page, limit, sortedQuotes.length);
+
+  if (response.data.length === 0 && page > 1) {
+    return res.status(404).json({ error: "Page not found. No quotes available for the requested page." });
+  }
+
+  if (response.data.length === 0) {
+    return res.status(404).json({ error: "No quotes found matching the criteria." });
+  }
+
+  res.json(response);
+});
+
+// Continue with other endpoints... (keeping them similar but with loadData() calls)
+// I'll add the rest of the endpoints in the next part to keep this manageable
+
+// Get quotes by specific author with pagination
+app.get("/api/quotes/by-author/:author", (req, res) => {
+  loadData();
+  
+  const authorParam = req.params.author;
+  const authorValidation = validateStringParam(authorParam, 'author');
+  if (authorValidation && authorValidation.error) {
+    return res.status(400).json({ error: authorValidation.error });
+  }
+
+  const author = authorValidation.value;
+  const lowercaseAuthor = author.toLowerCase();
+  
+  if (!authorMap[lowercaseAuthor]) {
+    return res.status(404).json({ error: `Author "${author}" not found.` });
+  }
+
+  const properAuthorName = authorMap[lowercaseAuthor];
+  const paginationValidation = validatePaginationParams(req.query.page, req.query.limit);
+  if (paginationValidation.error) {
+    return res.status(400).json({ error: paginationValidation.error });
+  }
+  const { page, limit } = paginationValidation;
+
+  const validSorts = ['id', 'length', 'random'];
+  const sort = req.query.sort && validSorts.includes(req.query.sort) ? req.query.sort : 'id';
+  const order = req.query.order === 'desc' ? 'desc' : 'asc';
+
+  const authorQuotes = quotesData.filter((quote) => quote.author === properAuthorName);
+  const sortedQuotes = sortQuotes(authorQuotes, sort, order);
+  const response = createPaginatedResponse(sortedQuotes, page, limit, sortedQuotes.length);
+
+  if (response.data.length === 0 && page > 1) {
+    return res.status(404).json({ error: "Page not found. No quotes available for the requested page." });
+  }
+
+  if (response.data.length === 0) {
+    return res.status(404).json({ error: `No quotes found for author "${properAuthorName}".` });
+  }
+
+  res.json(response);
+});
+
+// Get quotes by specific tag with pagination
+app.get("/api/quotes/by-tag/:tag", (req, res) => {
+  loadData();
+  
+  const tagParam = req.params.tag;
+  const tagValidation = validateStringParam(tagParam, 'tag');
+  if (tagValidation && tagValidation.error) {
+    return res.status(400).json({ error: tagValidation.error });
+  }
+
+  const tag = tagValidation.value.toLowerCase();
+  
+  if (!validTagsSet.has(tag)) {
+    return res.status(404).json({ error: `Tag "${tag}" not found.` });
+  }
+
+  const paginationValidation = validatePaginationParams(req.query.page, req.query.limit);
+  if (paginationValidation.error) {
+    return res.status(400).json({ error: paginationValidation.error });
+  }
+  const { page, limit } = paginationValidation;
+
+  const validSorts = ['id', 'author', 'length', 'random'];
+  const sort = req.query.sort && validSorts.includes(req.query.sort) ? req.query.sort : 'id';
+  const order = req.query.order === 'desc' ? 'desc' : 'asc';
+
+  const tagQuotes = quotesData.filter((quote) => quote.tags.includes(tag));
+  const sortedQuotes = sortQuotes(tagQuotes, sort, order);
+  const response = createPaginatedResponse(sortedQuotes, page, limit, sortedQuotes.length);
+
+  if (response.data.length === 0 && page > 1) {
+    return res.status(404).json({ error: "Page not found. No quotes available for the requested page." });
+  }
+
+  if (response.data.length === 0) {
+    return res.status(404).json({ error: `No quotes found for tag "${tag}".` });
+  }
+
+  res.json(response);
+});
+
+// Get paginated authors list
+app.get("/api/authors/paginated", (req, res) => {
+  loadData();
+  
+  const paginationValidation = validatePaginationParams(req.query.page, req.query.limit);
+  if (paginationValidation.error) {
+    return res.status(400).json({ error: paginationValidation.error });
+  }
+  const { page, limit } = paginationValidation;
+
+  const validSorts = ['name', 'count'];
+  const sort = req.query.sort && validSorts.includes(req.query.sort) ? req.query.sort : 'name';
+  const order = req.query.order === 'desc' ? 'desc' : 'asc';
+
+  let searchTerm = null;
+  if (req.query.search !== undefined) {
+    const searchValidation = validateStringParam(req.query.search, 'search');
+    if (searchValidation && searchValidation.error) {
+      return res.status(400).json({ error: searchValidation.error });
+    }
+    if (searchValidation) {
+      searchTerm = searchValidation.value.toLowerCase();
+    }
+  }
+
+  let authorsArray = Object.entries(authorsData).map(([name, count]) => ({
+    name: name,
+    count: count
+  }));
+
+  if (searchTerm) {
+    authorsArray = authorsArray.filter(author => 
+      author.name.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  if (sort === 'count') {
+    authorsArray.sort((a, b) => a.count - b.count);
+  } else {
+    authorsArray.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  if (order === 'desc') {
+    authorsArray.reverse();
+  }
+
+  const response = createPaginatedResponse(authorsArray, page, limit, authorsArray.length);
+
+  if (response.data.length === 0 && page > 1) {
+    return res.status(404).json({ error: "Page not found. No authors available for the requested page." });
+  }
+
+  if (response.data.length === 0) {
+    return res.status(404).json({ error: "No authors found matching the criteria." });
+  }
+
+  res.json(response);
+});
+
+// ORIGINAL ENDPOINTS (optimized)
+
+// Get list of all available authors with their quote counts
+app.get("/api/authors", (req, res) => {
+  loadData();
+  res.json(authorsData);
 });
 
 // Get list of all available tags
 app.get("/api/tags", (req, res) => {
-  // Use pre-loaded tagsData
+  loadData();
   res.json(tagsData);
 });
 
-// Handle non-GET methods for tags endpoint
-app.all("/api/tags", (req, res) => {
-  res.status(405).json({ error: `Method ${req.method} not allowed for this endpoint.` });
-});
-
-// Main quote endpoint
+// Main quote endpoint (optimized)
 app.get("/api/quotes/random", (req, res) => {
-  // Validate and parse numeric parameters
+  loadData();
+  
   const maxLengthValidation = validateNumericParam(req.query.maxLength, 'maxLength', 1);
   if (maxLengthValidation && maxLengthValidation.error) {
     return res.status(400).json({ error: maxLengthValidation.error });
@@ -205,55 +627,60 @@ app.get("/api/quotes/random", (req, res) => {
   }
   const count = countValidation ? countValidation.value : 1;
 
-  // Validate and parse string parameters
-  const tagsParam = validateStringParam(req.query.tags, 'tags');
-  const tags = tagsParam ? tagsParam.split(",").map((tag) => tag.toLowerCase().trim()).filter(Boolean) : null;
-  
-  const authorsParam = validateStringParam(req.query.authors, 'authors');
-  const authors = authorsParam ? authorsParam.split(",").map((author) => author.trim()).filter(Boolean) : null;
+  let tags = null;
+  let authors = null;
 
-  // Validate authors only if authors parameter is provided
-  if (authors) {
-    // Use pre-computed global authorMap
-    // Check for invalid authors and convert to proper case
-      const processedAuthors = [];
-      const invalidAuthors = [];
-
-      authors.forEach((author) => {
-        const lowercaseAuthor = author.toLowerCase();
-        if (authorMap[lowercaseAuthor]) {
-          processedAuthors.push(authorMap[lowercaseAuthor]);
-        } else {
-          invalidAuthors.push(author);
-        }
-      });
-
-      if (invalidAuthors.length > 0) {
-        return res.status(400).json({
-          error: `Invalid author(s): ${invalidAuthors.join(", ")}`,
-        });
-      }
-
-      // Replace the authors array with the properly cased versions
-      authors.splice(0, authors.length, ...processedAuthors);
-    // Removed catch block as authorsData is pre-loaded,
-    // though other errors during processing might still occur.
-    // Consider if specific error handling for author processing is needed.
+  if (req.query.tags !== undefined) {
+    const tagsValidation = validateStringParam(req.query.tags, 'tags');
+    if (tagsValidation && tagsValidation.error) {
+      return res.status(400).json({ error: tagsValidation.error });
+    }
+    if (tagsValidation) {
+      tags = tagsValidation.value.split(",").map((tag) => tag.toLowerCase().trim()).filter(Boolean);
+    }
   }
 
-  // Validate tags only if tags parameter is provided
+  if (req.query.authors !== undefined) {
+    const authorsValidation = validateStringParam(req.query.authors, 'authors');
+    if (authorsValidation && authorsValidation.error) {
+      return res.status(400).json({ error: authorsValidation.error });
+    }
+    if (authorsValidation) {
+      authors = authorsValidation.value.split(",").map((author) => author.trim()).filter(Boolean);
+    }
+  }
+
+  if (authors) {
+    const processedAuthors = [];
+    const invalidAuthors = [];
+
+    authors.forEach((author) => {
+      const lowercaseAuthor = author.toLowerCase();
+      if (authorMap[lowercaseAuthor]) {
+        processedAuthors.push(authorMap[lowercaseAuthor]);
+      } else {
+        invalidAuthors.push(author);
+      }
+    });
+
+    if (invalidAuthors.length > 0) {
+      return res.status(400).json({
+        error: `Invalid author(s): ${invalidAuthors.join(", ")}`,
+      });
+    }
+
+    authors.splice(0, authors.length, ...processedAuthors);
+  }
+
   if (tags) {
-    // Use pre-computed global validTagsSet
     const invalidTags = tags.filter((tag) => !validTagsSet.has(tag));
     if (invalidTags.length > 0) {
       return res.status(400).json({
         error: `Invalid tag(s): ${invalidTags.join(", ")}`,
       });
     }
-    // Removed catch block as tagsData is pre-loaded.
   }
 
-  // Validate length parameters if both are provided
   if (minLength !== null && maxLength !== null && minLength > maxLength) {
     return res.status(400).json({
       error: "minLength must be less than or equal to maxLength.",
@@ -269,9 +696,25 @@ app.get("/api/quotes/random", (req, res) => {
   }
 });
 
-// Handle non-GET methods for quotes endpoint
-app.all("/api/quotes/random", (req, res) => {
-  res.status(405).json({ error: `Method ${req.method} not allowed for this endpoint.` });
+// Handle non-GET methods for all endpoints
+const endpoints = [
+  "/api/quotes/random",
+  "/api/quotes",
+  "/api/quotes/by-author/:author",
+  "/api/quotes/by-tag/:tag",
+  "/api/authors",
+  "/api/authors/paginated",
+  "/api/tags"
+];
+
+endpoints.forEach(endpoint => {
+  app.all(endpoint, (req, res) => {
+    if (req.method === 'HEAD') {
+      res.status(200).end();
+    } else if (req.method !== 'GET') {
+      res.status(405).json({ error: `Method ${req.method} not allowed for this endpoint.` });
+    }
+  });
 });
 
 // Home page route
@@ -279,9 +722,35 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/index.html"));
 });
 
-// Handle 404 for API routes - this should be a catch-all for unmatched API routes
+// API Documentation routes
+app.get("/docs", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/docs.html"));
+});
+
+app.get("/openapi.yaml", (req, res) => {
+  res.setHeader('Content-Type', 'text/yaml');
+  res.sendFile(path.join(__dirname, "../openapi.yaml"));
+});
+
+app.get("/openapi.json", (req, res) => {
+  // Serve YAML as JSON for compatibility
+  const yaml = require('fs').readFileSync(path.join(__dirname, "../openapi.yaml"), 'utf8');
+  res.setHeader('Content-Type', 'application/json');
+  res.json({ 
+    message: "OpenAPI JSON conversion not available. Please use /openapi.yaml or visit /docs for interactive documentation.",
+    yaml_url: "/openapi.yaml",
+    docs_url: "/docs"
+  });
+});
+
+// Handle invalid API endpoints
 app.use("/api", (req, res) => {
   res.status(404).json({ error: "API endpoint not found." });
+});
+
+// Handle 404 for non-API routes
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(__dirname, "../public/index.html"));
 });
 
 module.exports = app;

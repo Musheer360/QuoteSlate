@@ -244,11 +244,17 @@
                 <h2>About QuoteSlate</h2>
                 <p>
                     QuoteSlate is a powerful API that provides access to a vast
-                    collection of inspirational quotes. With support for
-                    filtering by author, length, and tags, you can easily find
-                    the perfect quote for your needs. Whether you're building a
-                    motivational app, a writing tool, or just looking for daily
+                    collection of 2,616+ inspirational quotes from 1,000+ authors. 
+                    With support for both random access and systematic browsing through 
+                    pagination, plus advanced filtering by author, length, and tags, 
+                    you can easily find the perfect quote for your needs. Whether you're 
+                    building a motivational app, a writing tool, or just looking for daily
                     inspiration, QuoteSlate has got you covered!
+                </p>
+                <p>
+                    <strong>🆕 New Features:</strong> Browse quotes systematically with 
+                    pagination, search functionality, and dedicated endpoints for exploring 
+                    quotes by specific authors or tags.
                 </p>
             </div>
 
@@ -311,6 +317,81 @@
 
             <div class="card">
                 <h2>API Endpoints</h2>
+
+                <h3 style="color: var(--secondary-color); margin-top: 2rem;">🆕 New Pagination Endpoints</h3>
+
+                <div class="endpoint">
+                    <h3>Browse All Quotes (Paginated)</h3>
+                    <p>Browse quotes systematically with pagination, search, sorting, and filtering.</p>
+                    <code>GET /api/quotes?page=1&amp;limit=20</code>
+                    <div class="try-it-container">
+                        <input type="number" class="param-input" placeholder="Page" min="1" value="1" />
+                        <input type="number" class="param-input" placeholder="Limit (1-100)" min="1" max="100" value="10" />
+                        <select class="param-input">
+                            <option value="">Sort by...</option>
+                            <option value="id">ID</option>
+                            <option value="author">Author</option>
+                            <option value="length">Length</option>
+                            <option value="random">Random</option>
+                        </select>
+                        <input type="text" class="param-input" placeholder="Search quotes..." />
+                        <button class="try-it" data-endpoint="/api/quotes">Try it</button>
+                        <span class="loading" style="display: none"></span>
+                    </div>
+                    <div class="response-area">
+                        <pre><code class="language-json"></code></pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <h3>Get Quotes by Specific Author (Paginated)</h3>
+                    <p>Get all quotes from a specific author with pagination and sorting.</p>
+                    <code>GET /api/quotes/by-author/Albert%20Einstein?page=1&amp;limit=10</code>
+                    <div class="try-it-container">
+                        <input type="text" class="param-input" placeholder="Author name" value="Albert Einstein" />
+                        <input type="number" class="param-input" placeholder="Page" min="1" value="1" />
+                        <input type="number" class="param-input" placeholder="Limit" min="1" max="100" value="5" />
+                        <button class="try-it" data-endpoint="/api/quotes/by-author">Try it</button>
+                        <span class="loading" style="display: none"></span>
+                    </div>
+                    <div class="response-area">
+                        <pre><code class="language-json"></code></pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <h3>Get Quotes by Specific Tag (Paginated)</h3>
+                    <p>Get all quotes with a specific tag with pagination and sorting.</p>
+                    <code>GET /api/quotes/by-tag/motivation?page=1&amp;limit=10</code>
+                    <div class="try-it-container">
+                        <input type="text" class="param-input" placeholder="Tag name" value="motivation" />
+                        <input type="number" class="param-input" placeholder="Page" min="1" value="1" />
+                        <input type="number" class="param-input" placeholder="Limit" min="1" max="100" value="5" />
+                        <button class="try-it" data-endpoint="/api/quotes/by-tag">Try it</button>
+                        <span class="loading" style="display: none"></span>
+                    </div>
+                    <div class="response-area">
+                        <pre><code class="language-json"></code></pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <h3>Browse Authors (Paginated)</h3>
+                    <p>Browse all authors with pagination and search functionality.</p>
+                    <code>GET /api/authors/paginated?page=1&amp;limit=20</code>
+                    <div class="try-it-container">
+                        <input type="number" class="param-input" placeholder="Page" min="1" value="1" />
+                        <input type="number" class="param-input" placeholder="Limit" min="1" max="100" value="10" />
+                        <input type="text" class="param-input" placeholder="Search authors..." />
+                        <button class="try-it" data-endpoint="/api/authors/paginated">Try it</button>
+                        <span class="loading" style="display: none"></span>
+                    </div>
+                    <div class="response-area">
+                        <pre><code class="language-json"></code></pre>
+                    </div>
+                </div>
+
+                <h3 style="color: var(--primary-color); margin-top: 2rem;">Original Random Access Endpoints</h3>
 
                 <div class="endpoint">
                     <h3>Get a Random Quote</h3>
@@ -559,61 +640,121 @@
                     button.addEventListener("click", async (e) => {
                         e.preventDefault();
                         const container = button.closest(".endpoint");
-                        const responseArea =
-                            container.querySelector(".response-area");
+                        const responseArea = container.querySelector(".response-area");
                         const codeElement = responseArea.querySelector("code");
-                        const loadingSpinner =
-                            container.querySelector(".loading");
+                        const loadingSpinner = container.querySelector(".loading");
 
                         button.disabled = true;
                         loadingSpinner.style.display = "inline-block";
 
                         let params = new URLSearchParams();
-
-                        // Handle count parameter
-                        const countInput =
-                            container.querySelector(".count-input");
-                        if (countInput && countInput.value.trim()) {
-                            params.append("count", countInput.value.trim());
-                        }
-
-                        // Handle tag parameter
-                        const tagInput = container.querySelector(".tag-input");
-                        if (tagInput && tagInput.value.trim()) {
-                            params.append("tags", tagInput.value.trim());
-                        }
-
-                        // Handle author parameter
-                        const authorInput =
-                            container.querySelector(".author-input");
-                        if (authorInput && authorInput.value.trim()) {
-                            params.append("authors", authorInput.value.trim());
-                        }
-
-                        // Handle length parameters - simplified logic matching the range section
-                        const lengthInputs = container.querySelectorAll(
-                            ".param-input:not(.count-input)",
-                        );
-                        if (lengthInputs.length >= 2) {
-                            const minLength = lengthInputs[0].value.trim();
-                            const maxLength = lengthInputs[1].value.trim();
-                            if (minLength)
-                                params.append("minLength", minLength);
-                            if (maxLength)
-                                params.append("maxLength", maxLength);
-                        }
-
                         const endpoint = button.dataset.endpoint;
-                        const url = `${endpoint}${params.toString() ? "?" + params.toString() : ""}`;
+
+                        // Handle different endpoint types
+                        if (endpoint === "/api/quotes") {
+                            // Paginated quotes endpoint
+                            const inputs = container.querySelectorAll(".param-input");
+                            const page = inputs[0]?.value?.trim();
+                            const limit = inputs[1]?.value?.trim();
+                            const sort = inputs[2]?.value?.trim();
+                            const search = inputs[3]?.value?.trim();
+
+                            if (page) params.append("page", page);
+                            if (limit) params.append("limit", limit);
+                            if (sort) params.append("sort", sort);
+                            if (search) params.append("search", search);
+
+                        } else if (endpoint === "/api/quotes/by-author") {
+                            // Author-specific quotes
+                            const inputs = container.querySelectorAll(".param-input");
+                            const author = inputs[0]?.value?.trim();
+                            const page = inputs[1]?.value?.trim();
+                            const limit = inputs[2]?.value?.trim();
+
+                            if (!author) {
+                                alert("Please enter an author name");
+                                button.disabled = false;
+                                loadingSpinner.style.display = "none";
+                                return;
+                            }
+
+                            if (page) params.append("page", page);
+                            if (limit) params.append("limit", limit);
+
+                        } else if (endpoint === "/api/quotes/by-tag") {
+                            // Tag-specific quotes
+                            const inputs = container.querySelectorAll(".param-input");
+                            const tag = inputs[0]?.value?.trim();
+                            const page = inputs[1]?.value?.trim();
+                            const limit = inputs[2]?.value?.trim();
+
+                            if (!tag) {
+                                alert("Please enter a tag name");
+                                button.disabled = false;
+                                loadingSpinner.style.display = "none";
+                                return;
+                            }
+
+                            if (page) params.append("page", page);
+                            if (limit) params.append("limit", limit);
+
+                        } else if (endpoint === "/api/authors/paginated") {
+                            // Paginated authors
+                            const inputs = container.querySelectorAll(".param-input");
+                            const page = inputs[0]?.value?.trim();
+                            const limit = inputs[1]?.value?.trim();
+                            const search = inputs[2]?.value?.trim();
+
+                            if (page) params.append("page", page);
+                            if (limit) params.append("limit", limit);
+                            if (search) params.append("search", search);
+
+                        } else {
+                            // Original endpoints logic
+                            // Handle count parameter
+                            const countInput = container.querySelector(".count-input");
+                            if (countInput && countInput.value.trim()) {
+                                params.append("count", countInput.value.trim());
+                            }
+
+                            // Handle tag parameter
+                            const tagInput = container.querySelector(".tag-input");
+                            if (tagInput && tagInput.value.trim()) {
+                                params.append("tags", tagInput.value.trim());
+                            }
+
+                            // Handle author parameter
+                            const authorInput = container.querySelector(".author-input");
+                            if (authorInput && authorInput.value.trim()) {
+                                params.append("authors", authorInput.value.trim());
+                            }
+
+                            // Handle length parameters
+                            const lengthInputs = container.querySelectorAll(".param-input:not(.count-input)");
+                            if (lengthInputs.length >= 2) {
+                                const minLength = lengthInputs[0].value.trim();
+                                const maxLength = lengthInputs[1].value.trim();
+                                if (minLength) params.append("minLength", minLength);
+                                if (maxLength) params.append("maxLength", maxLength);
+                            }
+                        }
+
+                        // Build URL
+                        let url;
+                        if (endpoint === "/api/quotes/by-author") {
+                            const authorName = container.querySelector(".param-input").value.trim();
+                            url = `${endpoint}/${encodeURIComponent(authorName)}${params.toString() ? "?" + params.toString() : ""}`;
+                        } else if (endpoint === "/api/quotes/by-tag") {
+                            const tagName = container.querySelector(".param-input").value.trim();
+                            url = `${endpoint}/${encodeURIComponent(tagName)}${params.toString() ? "?" + params.toString() : ""}`;
+                        } else {
+                            url = `${endpoint}${params.toString() ? "?" + params.toString() : ""}`;
+                        }
 
                         try {
                             const response = await fetch(url);
                             const data = await response.json();
-                            codeElement.textContent = JSON.stringify(
-                                data,
-                                null,
-                                2,
-                            );
+                            codeElement.textContent = JSON.stringify(data, null, 2);
                             Prism.highlightElement(codeElement);
                             responseArea.style.display = "block";
                         } catch (error) {
