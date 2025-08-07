@@ -19,11 +19,6 @@
       "dest": "/src/index.js"
     }
   ],
-  "functions": {
-    "src/index.js": {
-      "maxDuration": 10
-    }
-  },
   "headers": [
     {
       "source": "/api/quotes/random",
