@@ -1,0 +1,79 @@
+# robots.txt for QuoteSlate API
+# https://quoteslate.vercel.app/robots.txt
+
+# Allow all web crawlers to access the site
+User-agent: *
+Allow: /
+
+# Specifically allow major search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+# Allow API documentation and main pages
+Allow: /docs
+Allow: /openapi.yaml
+Allow: /openapi.json
+
+# Allow API endpoints for discovery (but rate-limited)
+Allow: /api/
+Allow: /api/quotes
+Allow: /api/authors
+Allow: /api/tags
+Allow: /health
+
+# Disallow aggressive crawling of paginated endpoints to prevent abuse
+# Allow discovery but discourage deep crawling
+User-agent: *
+Crawl-delay: 2
+
+# Disallow overly aggressive bots
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: MJ12bot
+Crawl-delay: 10
+
+User-agent: DotBot
+Crawl-delay: 10
+
+# Block known bad bots and scrapers
+User-agent: SemrushBot
+Disallow: /api/
+
+User-agent: AhrefsBot
+Disallow: /api/quotes/random
+
+User-agent: MJ12bot
+Disallow: /api/quotes/random
+
+# Prevent excessive API usage by crawlers
+User-agent: *
+Disallow: /api/quotes/random?count=*
+Disallow: /api/quotes?page=*&limit=100
+Disallow: /api/quotes/by-author/*/page=*
+Disallow: /api/quotes/by-tag/*/page=*
+
+# Sitemap location
+Sitemap: https://quoteslate.vercel.app/sitemap.xml
+
+# Additional information
+# This is a public API service
+# Please respect rate limits: 100 requests per 15 minutes
+# For high-volume usage, please deploy your own instance
+# Repository: https://github.com/Musheer360/QuoteSlate
+# Contact: me@musheer360.com

@@ -727,7 +727,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 <div align="center">
 
-Made with ❤️ by [Musheer Alam](https://github.com/Musheer360)
+Made with ❤️ by [Musheer360](https://github.com/Musheer360)
 
 [⬆ Back to top](#quoteslate-api)
 

@@ -722,6 +722,18 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/index.html"));
 });
 
+// Robots.txt route
+app.get("/robots.txt", (req, res) => {
+  res.setHeader('Content-Type', 'text/plain');
+  res.sendFile(path.join(__dirname, "../public/robots.txt"));
+});
+
+// Sitemap.xml route
+app.get("/sitemap.xml", (req, res) => {
+  res.setHeader('Content-Type', 'application/xml');
+  res.sendFile(path.join(__dirname, "../public/sitemap.xml"));
+});
+
 // Create a separate rate limiter for documentation endpoints
 const docsLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
