@@ -1,8 +1,22 @@
 {
   "name": "QuoteSlate",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "A simple Quotes API.",
   "main": "src/index.js",
+  "author": {
+    "name": "Musheer Alam",
+    "email": "me@musheer360.com",
+    "url": "https://github.com/Musheer360"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Musheer360/QuoteSlate.git"
+  },
+  "homepage": "https://quoteslate.vercel.app",
+  "bugs": {
+    "url": "https://github.com/Musheer360/QuoteSlate/issues"
+  },
+  "license": "MIT",
   "scripts": {
     "start": "node src/index.js",
     "test": "node tests/api.test.js"
@@ -11,5 +25,13 @@
     "express": "^5.1.0",
     "cors": "^2.8.5",
     "express-rate-limit": "^8.0.1"
-  }
+  },
+  "keywords": [
+    "quotes",
+    "api",
+    "inspirational",
+    "rest-api",
+    "express",
+    "nodejs"
+  ]
 }
