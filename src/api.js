@@ -710,10 +710,25 @@ app.get("/api/quotes", (req, res) => {
   res.json(response);
 });
 
-// Continue with other endpoints... (keeping them similar but with loadData() calls)
-// I'll add the rest of the endpoints in the next part to keep this manageable
+// =============================================================================
+// AUTHOR-SPECIFIC ENDPOINTS
+// =============================================================================
 
-// Get quotes by specific author with pagination
+/**
+ * Get quotes by specific author with pagination support.
+ * 
+ * @route GET /api/quotes/by-author/:author
+ * @param {string} author - Author name (URL encoded)
+ * @query {number} page - Page number (default: 1)
+ * @query {number} limit - Items per page (default: 20, max: 100)
+ * @returns {Object} Paginated quotes by the specified author
+ * 
+ * Features:
+ * - Case-insensitive author matching
+ * - URL decoding for author names with spaces/special characters
+ * - Comprehensive input validation and sanitization
+ * - Paginated results with metadata
+ */
 app.get("/api/quotes/by-author/:author", (req, res) => {
   loadData();
   
