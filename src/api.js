@@ -722,17 +722,28 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/index.html"));
 });
 
+// Create a separate rate limiter for documentation endpoints
+const docsLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 200, // Higher limit for documentation access (more lenient than API)
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: "Too many requests to documentation endpoints, please try again later.",
+  }
+});
+
 // API Documentation routes
-app.get("/docs", (req, res) => {
+app.get("/docs", docsLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, "../public/docs.html"));
 });
 
-app.get("/openapi.yaml", (req, res) => {
+app.get("/openapi.yaml", docsLimiter, (req, res) => {
   res.setHeader('Content-Type', 'text/yaml');
   res.sendFile(path.join(__dirname, "../openapi.yaml"));
 });
 
-app.get("/openapi.json", (req, res) => {
+app.get("/openapi.json", docsLimiter, (req, res) => {
   // Serve YAML as JSON for compatibility
   const yaml = require('fs').readFileSync(path.join(__dirname, "../openapi.yaml"), 'utf8');
   res.setHeader('Content-Type', 'application/json');
