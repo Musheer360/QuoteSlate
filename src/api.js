@@ -26,6 +26,21 @@ const rateLimit = require("express-rate-limit");
 const app = express();
 
 // =============================================================================
+// CONFIGURATION FLAGS
+// =============================================================================
+
+/**
+ * Configuration flags for enabling/disabling features
+ * Set ENABLE_RATE_LIMITING to false for testing or development
+ */
+const CONFIG = {
+  ENABLE_RATE_LIMITING: process.env.DISABLE_RATE_LIMITING !== 'true', // Default: enabled
+  TESTING_MODE: process.env.NODE_ENV === 'test'
+};
+
+console.log(`🔧 Configuration: Rate Limiting ${CONFIG.ENABLE_RATE_LIMITING ? 'ENABLED' : 'DISABLED'}`);
+
+// =============================================================================
 // MIDDLEWARE CONFIGURATION
 // =============================================================================
 
@@ -90,7 +105,6 @@ app.use((req, res, next) => {
     // Documentation and static content can be cached longer
     res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour
   }
-  }
   
   next();
 });
@@ -130,10 +144,15 @@ const apiLimiter = rateLimit({
 });
 
 /**
- * Apply rate limiting middleware to all API routes.
+ * Apply rate limiting middleware to all API routes (if enabled).
  * This ensures consistent rate limiting across all API endpoints.
  */
-app.use("/api/", apiLimiter);
+if (CONFIG.ENABLE_RATE_LIMITING) {
+  app.use("/api/", apiLimiter);
+  console.log('🚦 Rate limiting applied to /api/ routes');
+} else {
+  console.log('⚠️  Rate limiting DISABLED - not recommended for production');
+}
 
 // =============================================================================
 // DATA LOADING AND CACHING
@@ -335,19 +354,62 @@ function sortQuotes(quotes, sort = 'id', order = 'asc') {
 function validateNumericParam(value, paramName, min = null, max = null) {
   if (value === null || value === undefined) return null;
   
-  if (typeof value === 'string' && value.trim() === '') {
-    return { error: `${paramName} cannot be empty.` };
+  // Convert to string for validation
+  const strValue = String(value);
+  
+  // Reject strings that are only whitespace (including spaces, tabs, etc.) BEFORE checking for empty
+  if (/^\s+$/.test(strValue)) {
+    return { error: `${paramName} cannot be only whitespace.` };
   }
   
-  if (typeof value === 'string' && value.includes('.')) {
+  // Handle empty strings - should return null to use defaults, not error
+  if (strValue.trim() === '') {
+    return null; // Allow defaults to be used
+  }
+  
+  const trimmedValue = strValue.trim();
+  
+  // Reject scientific notation (e.g., 1e10, 1E5)
+  if (/[eE]/.test(trimmedValue)) {
+    return { error: `${paramName} must be a simple integer (scientific notation not allowed).` };
+  }
+  
+  // Reject hexadecimal notation (e.g., 0x10, 0X10)
+  if (/^0[xX]/.test(trimmedValue)) {
+    return { error: `${paramName} must be a decimal integer (hexadecimal not allowed).` };
+  }
+  
+  // Reject explicit octal notation (e.g., 0o10, 0O10) but allow plain numbers like "010"
+  if (/^0[oO]/.test(trimmedValue)) {
+    return { error: `${paramName} must be a decimal integer (octal notation not allowed).` };
+  }
+  
+  // Reject binary notation (e.g., 0b10, 0B10)
+  if (/^0[bB]/.test(trimmedValue)) {
+    return { error: `${paramName} must be a decimal integer (binary notation not allowed).` };
+  }
+  
+  // Check for decimal points (reject floats)
+  if (trimmedValue.includes('.')) {
     return { error: `${paramName} must be a whole number.` };
   }
   
-  const num = parseInt(value);
+  // Parse as integer with base 10 to avoid octal interpretation
+  const num = parseInt(trimmedValue, 10);
+  
+  // Check if parsing failed
   if (isNaN(num)) {
-    return { error: `${paramName} must be a valid number.` };
+    return { error: `${paramName} must be a valid integer.` };
   }
   
+  // For validation, check if the parsed number makes sense
+  // Allow leading zeros in the input (like "010" -> 10)
+  const normalizedInput = trimmedValue.replace(/^\+/, '').replace(/^0+/, '') || '0';
+  if (String(num) !== normalizedInput && String(num) !== trimmedValue.replace(/^\+/, '')) {
+    return { error: `${paramName} must be a valid integer.` };
+  }
+  
+  // Check min/max constraints
   if (min !== null && num < min) {
     return { error: `${paramName} must be greater than or equal to ${min}.` };
   }
@@ -732,7 +794,14 @@ app.get("/api/quotes", (req, res) => {
 app.get("/api/quotes/by-author/:author", (req, res) => {
   loadData();
   
-  const authorParam = req.params.author;
+  // First decode the URL-encoded author parameter
+  let authorParam;
+  try {
+    authorParam = decodeURIComponent(req.params.author);
+  } catch (error) {
+    return res.status(400).json({ error: 'Invalid URL encoding in author parameter.' });
+  }
+  
   const authorValidation = validateStringParam(authorParam, 'author');
   if (authorValidation && authorValidation.error) {
     return res.status(400).json({ error: authorValidation.error });
@@ -775,7 +844,14 @@ app.get("/api/quotes/by-author/:author", (req, res) => {
 app.get("/api/quotes/by-tag/:tag", (req, res) => {
   loadData();
   
-  const tagParam = req.params.tag;
+  // First decode the URL-encoded tag parameter
+  let tagParam;
+  try {
+    tagParam = decodeURIComponent(req.params.tag);
+  } catch (error) {
+    return res.status(400).json({ error: 'Invalid URL encoding in tag parameter.' });
+  }
+  
   const tagValidation = validateStringParam(tagParam, 'tag');
   if (tagValidation && tagValidation.error) {
     return res.status(400).json({ error: tagValidation.error });
@@ -1026,16 +1102,16 @@ const docsLimiter = rateLimit({
 });
 
 // API Documentation routes
-app.get("/docs", docsLimiter, (req, res) => {
+app.get("/docs", CONFIG.ENABLE_RATE_LIMITING ? docsLimiter : (req, res, next) => next(), (req, res) => {
   res.sendFile(path.join(__dirname, "../public/docs.html"));
 });
 
-app.get("/openapi.yaml", docsLimiter, (req, res) => {
+app.get("/openapi.yaml", CONFIG.ENABLE_RATE_LIMITING ? docsLimiter : (req, res, next) => next(), (req, res) => {
   res.setHeader('Content-Type', 'text/yaml');
   res.sendFile(path.join(__dirname, "../openapi.yaml"));
 });
 
-app.get("/openapi.json", docsLimiter, (req, res) => {
+app.get("/openapi.json", CONFIG.ENABLE_RATE_LIMITING ? docsLimiter : (req, res, next) => next(), (req, res) => {
   // Serve YAML as JSON for compatibility
   const yaml = require('fs').readFileSync(path.join(__dirname, "../openapi.yaml"), 'utf8');
   res.setHeader('Content-Type', 'application/json');

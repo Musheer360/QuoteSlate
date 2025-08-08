@@ -69,8 +69,6 @@ function makeRequest(path, method = 'GET') {
       });
     });
 
-    // Handle request errors
-    req.on('error', (err) => {
     // Handle request errors and timeouts
     req.on('error', (err) => {
       reject(err);

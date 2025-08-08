@@ -19,7 +19,9 @@
   "license": "MIT",
   "scripts": {
     "start": "node src/index.js",
-    "test": "node tests/api.test.js"
+    "test": "node tests/api.test.js",
+    "test:comprehensive": "node tests/final-tests.js",
+    "test:basic": "node tests/api.test.js"
   },
   "dependencies": {
     "express": "^5.1.0",
