@@ -1,6 +1,52 @@
 # robots.txt for QuoteSlate API
 # https://quoteslate.vercel.app/robots.txt
 
+# =============================================================================
+# QUOTESLATE API - Inspirational Quotes API Service
+# =============================================================================
+# 
+# API Name: QuoteSlate
+# Version: 2.0.0
+# Description: A robust, developer-friendly REST API for serving inspirational 
+#              and thought-provoking quotes with powerful filtering capabilities
+# 
+# Created by: Musheer360 (Musheer Alam)
+# Email: me@musheer360.com
+# GitHub: https://github.com/Musheer360/QuoteSlate
+# Website: https://quoteslate.vercel.app
+# 
+# Features:
+# - 2,600+ curated quotes from 1,000+ authors
+# - Advanced filtering by author, tags, length
+# - Pagination and sorting capabilities
+# - Full-text search functionality
+# - Rate limiting for fair usage (100 req/15min)
+# - OpenAPI 3.0 specification
+# - Interactive Swagger documentation
+# - Free and open-source (MIT License)
+# 
+# API Endpoints:
+# - GET /api/quotes/random - Get random quotes with filters
+# - GET /api/quotes - Paginated quotes with search/sort
+# - GET /api/quotes/by-author/:author - Quotes by specific author
+# - GET /api/quotes/by-tag/:tag - Quotes by specific tag
+# - GET /api/authors - List all authors with quote counts
+# - GET /api/tags - List all available tags
+# - GET /health - API health status
+# 
+# Documentation:
+# - Interactive docs: https://quoteslate.vercel.app/docs
+# - OpenAPI spec: https://quoteslate.vercel.app/openapi.yaml
+# - GitHub README: https://github.com/Musheer360/QuoteSlate
+# 
+# Usage Guidelines:
+# - Respect rate limits to ensure fair access for all users
+# - For high-volume usage, deploy your own instance
+# - Attribution appreciated: "Quotes powered by QuoteSlate API"
+# - Report issues: https://github.com/Musheer360/QuoteSlate/issues
+# 
+# =============================================================================
+
 # Allow all web crawlers to access the site
 User-agent: *
 Allow: /
@@ -70,10 +116,3 @@ Disallow: /api/quotes/by-tag/*/page=*
 
 # Sitemap location
 Sitemap: https://quoteslate.vercel.app/sitemap.xml
-
-# Additional information
-# This is a public API service
-# Please respect rate limits: 100 requests per 15 minutes
-# For high-volume usage, please deploy your own instance
-# Repository: https://github.com/Musheer360/QuoteSlate
-# Contact: me@musheer360.com
