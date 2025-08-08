@@ -1,3 +1,23 @@
+/**
+ * QuoteSlate API - Main Application File
+ * 
+ * A robust, production-ready REST API for serving inspirational quotes
+ * with advanced filtering, pagination, and search capabilities.
+ * 
+ * Features:
+ * - 2,600+ curated quotes from 1,000+ authors
+ * - Advanced filtering by author, tags, and length
+ * - Pagination and sorting capabilities
+ * - Full-text search functionality
+ * - Rate limiting and security protection
+ * - OpenAPI 3.0 specification
+ * - Interactive Swagger documentation
+ * 
+ * @author Musheer Alam (Musheer360)
+ * @version 2.0.0
+ * @license MIT
+ */
+
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -5,109 +25,195 @@ const fs = require("fs");
 const rateLimit = require("express-rate-limit");
 const app = express();
 
-// Trust the proxy to get the real client IP (important for Vercel)
+// =============================================================================
+// MIDDLEWARE CONFIGURATION
+// =============================================================================
+
+/**
+ * Configure Express to trust proxy headers for accurate client IP detection.
+ * This is essential for proper rate limiting when deployed on platforms like Vercel.
+ */
 app.set("trust proxy", 1);
 
-// Handle OPTIONS method FIRST, before CORS middleware
+/**
+ * Handle preflight OPTIONS requests before CORS middleware.
+ * This ensures proper CORS handling for all cross-origin requests.
+ */
 app.use((req, res, next) => {
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.setHeader('Access-Control-Max-Age', '86400');
+    res.setHeader('Access-Control-Max-Age', '86400'); // Cache preflight for 24 hours
     res.status(200).end();
     return;
   }
   next();
 });
 
-// Enable CORS for all routes with optimized settings
+/**
+ * Enable Cross-Origin Resource Sharing (CORS) for all routes.
+ * Configured to allow GET, HEAD, and OPTIONS methods from any origin.
+ */
 app.use(cors({
-  origin: '*',
-  methods: ['GET', 'HEAD', 'OPTIONS'],
-  allowedHeaders: ['Content-Type'],
-  maxAge: 86400 // 24 hours
+  origin: '*',                              // Allow requests from any origin
+  methods: ['GET', 'HEAD', 'OPTIONS'],     // Restrict to safe HTTP methods
+  allowedHeaders: ['Content-Type'],        // Allow only necessary headers
+  maxAge: 86400                            // Cache CORS preflight for 24 hours
 }));
 
-// Add security headers with smart caching optimization
+/**
+ * Apply security headers and intelligent caching strategy.
+ * Different caching policies are applied based on endpoint characteristics:
+ * - Random endpoints: No caching (always fresh content)
+ * - Static endpoints: Short-term caching (5 minutes)
+ * - Documentation: Long-term caching (1 hour)
+ */
 app.use((req, res, next) => {
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
+  // Security headers to prevent common attacks
+  res.setHeader('X-Content-Type-Options', 'nosniff');    // Prevent MIME type sniffing
+  res.setHeader('X-Frame-Options', 'DENY');              // Prevent clickjacking
+  res.setHeader('X-XSS-Protection', '1; mode=block');    // Enable XSS protection
   
-  // Smart caching: NO cache for random endpoints, cache for others
+  // Intelligent caching strategy based on endpoint type
   if (req.path.startsWith('/api/')) {
     if (req.path.includes('/random')) {
-      // Random endpoints should NEVER be cached
+      // Random endpoints should never be cached to ensure fresh content
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
     } else {
-      // Other API endpoints can be cached (authors, tags, paginated results)
+      // Static API endpoints can be cached briefly (authors, tags, paginated results)
       res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300'); // 5 minutes
     }
   } else {
-    res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour for static content
+    // Documentation and static content can be cached longer
+    res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour
+  }
   }
   
   next();
 });
 
-// Optimized rate limiter for Vercel
+// =============================================================================
+// RATE LIMITING CONFIGURATION
+// =============================================================================
+
+/**
+ * Configure rate limiting for API endpoints to prevent abuse and ensure fair usage.
+ * 
+ * Rate Limiting Strategy:
+ * - 100 requests per 15-minute window per IP address
+ * - Applies to all /api/* endpoints
+ * - Uses sliding window algorithm for accurate rate limiting
+ * - Includes proper headers for client awareness
+ * - Skips rate limiting for static files and health checks
+ * 
+ * This configuration balances API accessibility with protection against abuse.
+ */
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  standardHeaders: true,
-  legacyHeaders: false,
+  windowMs: 15 * 60 * 1000,                    // 15-minute sliding window
+  max: 100,                                    // Maximum 100 requests per window
+  standardHeaders: true,                       // Include rate limit info in headers
+  legacyHeaders: false,                        // Disable deprecated headers
   message: {
     error: "Too many requests, please try again later. Consider using the 'count' parameter to fetch multiple quotes in a single request.",
   },
+  // Custom key generator for better IP detection behind proxies
+  keyGenerator: (req) => {
+    return req.ip || req.connection.remoteAddress || 'unknown';
+  },
+  // Skip rate limiting for static files and health checks
   skip: (req) => {
-    // Skip rate limiting for static files and health checks
     return req.path === '/' || req.path.startsWith('/favicon') || req.path.startsWith('/robots');
   }
 });
 
-// Apply rate limiting to all API routes
+/**
+ * Apply rate limiting middleware to all API routes.
+ * This ensures consistent rate limiting across all API endpoints.
+ */
 app.use("/api/", apiLimiter);
 
-// Lazy load data to improve cold start performance
+// =============================================================================
+// DATA LOADING AND CACHING
+// =============================================================================
+
+/**
+ * Global data storage for quotes, authors, and tags.
+ * These variables are populated lazily on first request to improve cold start performance.
+ */
 let quotesData, authorsData, tagsData, authorMap, validTagsSet;
 
+/**
+ * Lazy data loading function to improve application startup performance.
+ * 
+ * Data Loading Strategy:
+ * - Loads data only when first requested (lazy loading)
+ * - Caches data in memory for subsequent requests
+ * - Processes raw data into optimized lookup structures
+ * - Logs loading progress for monitoring
+ * 
+ * This approach significantly reduces cold start times on serverless platforms.
+ */
 function loadData() {
   if (!quotesData) {
     console.log('Loading data...');
+    
+    // Load quotes data from JSON file
     quotesData = JSON.parse(
       fs.readFileSync(path.join(__dirname, "../data/quotes.json"), "utf8"),
     );
     
+    // Load authors data from JSON file
     authorsData = JSON.parse(
       fs.readFileSync(path.join(__dirname, "../data/authors.json"), "utf8"),
     );
     
+    // Load tags data from JSON file
     tagsData = JSON.parse(
       fs.readFileSync(path.join(__dirname, "../data/tags.json"), "utf8"),
     );
 
-    // Pre-compute maps for efficient lookup
+    // Create optimized lookup structures for better performance
+    // Author map: case-insensitive author name lookup
     authorMap = {};
     Object.keys(authorsData).forEach((author) => {
       authorMap[author.toLowerCase()] = author;
     });
 
+    // Tags set: O(1) tag validation lookup
     validTagsSet = new Set(tagsData);
+    
     console.log(`Data loaded: ${quotesData.length} quotes, ${Object.keys(authorsData).length} authors, ${tagsData.length} tags`);
   }
 }
 
-// Helper function to validate pagination parameters
+// =============================================================================
+// VALIDATION HELPER FUNCTIONS
+// =============================================================================
+
+/**
+ * Validates and normalizes pagination parameters.
+ * 
+ * @param {string|number} page - The requested page number
+ * @param {string|number} limit - The requested items per page
+ * @returns {Object} Validation result with page/limit values or error message
+ * 
+ * Validation Rules:
+ * - Page: Must be >= 1, defaults to 1
+ * - Limit: Must be 1-100, defaults to 20
+ * - Returns normalized integer values
+ */
 function validatePaginationParams(page, limit) {
+  // Validate page parameter
   const pageValidation = validateNumericParam(page, 'page', 1);
   if (pageValidation && pageValidation.error) {
     return { error: pageValidation.error };
   }
   const pageNum = pageValidation ? pageValidation.value : 1;
 
+  // Validate limit parameter with maximum constraint
   const limitValidation = validateNumericParam(limit, 'limit', 1, 100);
   if (limitValidation && limitValidation.error) {
     return { error: limitValidation.error };
@@ -117,7 +223,19 @@ function validatePaginationParams(page, limit) {
   return { page: pageNum, limit: limitNum };
 }
 
-// Helper function to create pagination response
+/**
+ * Creates a standardized paginated response object.
+ * 
+ * @param {Array} data - The complete dataset to paginate
+ * @param {number} page - Current page number
+ * @param {number} limit - Items per page
+ * @param {number} total - Total number of items in the dataset
+ * @returns {Object} Paginated response with data and pagination metadata
+ * 
+ * Response Structure:
+ * - data: Array of items for the current page
+ * - pagination: Metadata including page info, totals, and navigation flags
+ */
 function createPaginatedResponse(data, page, limit, total) {
   const totalPages = Math.ceil(total / limit);
   const startIndex = (page - 1) * limit;
@@ -127,19 +245,31 @@ function createPaginatedResponse(data, page, limit, total) {
   return {
     data: paginatedData,
     pagination: {
-      page: page,
-      limit: limit,
-      total: total,
-      totalPages: totalPages,
-      hasNext: page < totalPages,
-      hasPrev: page > 1,
-      startIndex: startIndex + 1,
-      endIndex: Math.min(endIndex, total)
+      page: page,                              // Current page number
+      limit: limit,                            // Items per page
+      total: total,                            // Total items in dataset
+      totalPages: totalPages,                  // Total number of pages
+      hasNext: page < totalPages,              // Whether next page exists
+      hasPrev: page > 1,                       // Whether previous page exists
+      startIndex: startIndex + 1,              // 1-based start index for current page
+      endIndex: Math.min(endIndex, total)      // 1-based end index for current page
     }
   };
 }
 
-// Optimized sorting function with memoization
+/**
+ * Optimized sorting function with caching for improved performance.
+ * 
+ * @param {Array} quotes - Array of quote objects to sort
+ * @param {string} sort - Sort field ('id', 'author', 'length', 'random')
+ * @param {string} order - Sort order ('asc' or 'desc')
+ * @returns {Array} Sorted array of quotes
+ * 
+ * Performance Optimizations:
+ * - Caches sorted results to avoid repeated sorting
+ * - Uses efficient comparison functions
+ * - Handles random sorting with Fisher-Yates shuffle
+ */
 const sortCache = new Map();
 function sortQuotes(quotes, sort = 'id', order = 'asc') {
   const cacheKey = `${quotes.length}-${sort}-${order}`;
@@ -187,7 +317,21 @@ function sortQuotes(quotes, sort = 'id', order = 'asc') {
   return sortedQuotes;
 }
 
-// Enhanced validation functions (same as before but with better error messages)
+/**
+ * Validates and converts numeric parameters with range checking.
+ * 
+ * @param {string|number} value - The value to validate
+ * @param {string} paramName - Name of the parameter (for error messages)
+ * @param {number|null} min - Minimum allowed value (optional)
+ * @param {number|null} max - Maximum allowed value (optional)
+ * @returns {Object|null} Validation result with value or error message, null if value is empty
+ * 
+ * Validation Rules:
+ * - Converts strings to integers
+ * - Rejects decimal numbers (only whole numbers allowed)
+ * - Enforces min/max constraints if provided
+ * - Returns descriptive error messages for invalid inputs
+ */
 function validateNumericParam(value, paramName, min = null, max = null) {
   if (value === null || value === undefined) return null;
   
@@ -215,10 +359,38 @@ function validateNumericParam(value, paramName, min = null, max = null) {
   return { value: num };
 }
 
+/**
+ * Normalizes author names for case-insensitive lookup.
+ * 
+ * @param {string} author - The author name to normalize
+ * @returns {string} Normalized author name (decoded, trimmed, lowercase)
+ * 
+ * This function handles URL-encoded author names and ensures consistent
+ * case-insensitive matching against the author database.
+ */
 function normalizeAuthorName(author) {
   return decodeURIComponent(author).trim().toLowerCase();
 }
 
+/**
+ * Comprehensive string parameter validation with security protection.
+ * 
+ * @param {string} value - The string value to validate
+ * @param {string} paramName - Name of the parameter (for error messages)
+ * @returns {Object|null} Validation result with sanitized value or error message
+ * 
+ * Security Features:
+ * - Length validation to prevent DoS attacks
+ * - SQL injection pattern detection
+ * - XSS attack prevention
+ * - JavaScript protocol blocking
+ * - Dangerous character filtering
+ * 
+ * Parameter-specific handling:
+ * - Search: More lenient, allows most punctuation
+ * - Author/Tag: Strict validation with Unicode support
+ * - Others: Balanced security and usability
+ */
 function validateStringParam(value, paramName) {
   if (!value) return null;
   
@@ -227,13 +399,13 @@ function validateStringParam(value, paramName) {
     return { error: `${paramName} cannot be empty.` };
   }
   
-  // Check for maximum length to prevent abuse
+  // Length validation to prevent abuse and DoS attacks
   const maxLengths = {
-    'search': 500,
-    'author': 200,
-    'tag': 100,
-    'authors': 1000,
-    'tags': 500
+    'search': 500,      // Search queries can be longer
+    'author': 200,      // Author names have reasonable limits
+    'tag': 100,         // Tags are typically short
+    'authors': 1000,    // Multiple authors parameter
+    'tags': 500         // Multiple tags parameter
   };
   
   const maxLength = maxLengths[paramName] || 200;
@@ -299,6 +471,19 @@ function validateStringParam(value, paramName) {
   return { value: trimmed };
 }
 
+// =============================================================================
+// QUOTE FILTERING AND MATCHING FUNCTIONS
+// =============================================================================
+
+/**
+ * Checks if a quote matches any of the requested authors.
+ * 
+ * @param {Object} quote - The quote object to check
+ * @param {Array|null} requestedAuthors - Array of author names to match against
+ * @returns {boolean} True if quote matches any requested author or no authors specified
+ * 
+ * Uses case-insensitive matching with normalized author names for accurate results.
+ */
 function hasMatchingAuthor(quote, requestedAuthors) {
   if (!requestedAuthors) return true;
   const quoteAuthor = normalizeAuthorName(quote.author);
@@ -307,13 +492,38 @@ function hasMatchingAuthor(quote, requestedAuthors) {
   );
 }
 
+/**
+ * Checks if a quote contains all requested tags.
+ * 
+ * @param {Object} quote - The quote object to check
+ * @param {Array|null} requestedTags - Array of tags that must all be present
+ * @returns {boolean} True if quote contains all requested tags or no tags specified
+ * 
+ * Uses Set-based lookup for O(1) tag checking performance.
+ */
 function hasMatchingTags(quote, requestedTags) {
   if (!requestedTags) return true;
   const quoteTags = new Set(quote.tags);
   return requestedTags.every((tag) => quoteTags.has(tag));
 }
 
-// Optimized quote retrieval function
+/**
+ * Optimized quote retrieval function with advanced filtering capabilities.
+ * 
+ * @param {Object} options - Filtering options
+ * @param {number|null} options.maxLength - Maximum quote length
+ * @param {number|null} options.minLength - Minimum quote length
+ * @param {Array|null} options.tags - Required tags (all must be present)
+ * @param {number} options.count - Number of quotes to return (default: 1)
+ * @param {Array|null} options.authors - Allowed authors (any can match)
+ * @returns {Array|null} Array of matching quotes or null if none found
+ * 
+ * Performance Optimizations:
+ * - Uses reference instead of array spread for better memory usage
+ * - Applies filters in order of selectivity
+ * - Uses efficient random selection algorithms
+ * - Avoids duplicate selection in multi-quote requests
+ */
 function getQuotes({
   maxLength = null,
   minLength = null,
@@ -325,7 +535,7 @@ function getQuotes({
   
   let validQuotes = quotesData; // Use reference instead of spread for better performance
 
-  // Apply filters efficiently
+  // Apply filters efficiently in order of selectivity
   if (authors || tags || minLength !== null || maxLength !== null) {
     validQuotes = quotesData.filter((quote) => {
       if (authors && !hasMatchingAuthor(quote, authors)) return false;

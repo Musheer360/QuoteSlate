@@ -1,23 +1,65 @@
 #!/usr/bin/env node
 
+/**
+ * QuoteSlate API - Basic Test Suite
+ * 
+ * This file contains basic integration tests for the QuoteSlate API endpoints.
+ * It performs fundamental functionality testing to ensure the API is working
+ * correctly after deployment or code changes.
+ * 
+ * Test Coverage:
+ * - Health endpoint validation
+ * - Random quote endpoint functionality
+ * - Basic parameter validation
+ * - Error handling verification
+ * - Response format validation
+ * 
+ * Usage:
+ *   node tests/api.test.js
+ * 
+ * Prerequisites:
+ *   - API server must be running on localhost:3000
+ *   - All dependencies must be installed
+ * 
+ * @author Musheer Alam (Musheer360)
+ * @version 2.0.0
+ */
+
 const http = require('http');
 
+// Configuration constants
 const BASE_URL = 'http://localhost:3000';
+const TEST_TIMEOUT = 5000; // 5 seconds timeout for each test
 
+/**
+ * Makes an HTTP request to the API and returns a promise with the response.
+ * 
+ * @param {string} path - The API endpoint path to request
+ * @param {string} method - HTTP method (default: 'GET')
+ * @returns {Promise<Object>} Promise resolving to response object with statusCode, headers, and body
+ * 
+ * This helper function abstracts the HTTP request logic and provides
+ * consistent error handling and response parsing for all tests.
+ */
 function makeRequest(path, method = 'GET') {
   return new Promise((resolve, reject) => {
     const options = {
       hostname: 'localhost',
       port: 3000,
       path: path,
-      method: method
+      method: method,
+      timeout: TEST_TIMEOUT
     };
 
     const req = http.request(options, (res) => {
       let body = '';
+      
+      // Collect response data
       res.on('data', (chunk) => {
         body += chunk;
       });
+      
+      // Process complete response
       res.on('end', () => {
         resolve({
           statusCode: res.statusCode,
@@ -27,11 +69,229 @@ function makeRequest(path, method = 'GET') {
       });
     });
 
+    // Handle request errors
+    req.on('error', (err) => {
+    // Handle request errors and timeouts
     req.on('error', (err) => {
       reject(err);
     });
 
+    // Handle request timeout
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error(`Request timeout after ${TEST_TIMEOUT}ms`));
+    });
+
     req.end();
+  });
+}
+
+// =============================================================================
+// TEST EXECUTION AND REPORTING
+// =============================================================================
+
+/**
+ * Test result tracking object.
+ * Maintains counters for passed/failed tests and stores failure details.
+ */
+const testResults = {
+  passed: 0,
+  failed: 0,
+  failures: []
+};
+
+/**
+ * Assertion helper function for test validation.
+ * 
+ * @param {boolean} condition - The condition to test
+ * @param {string} testName - Descriptive name for the test
+ * @param {string} details - Additional details about the failure (optional)
+ * 
+ * This function provides consistent test result reporting and tracks
+ * both successful and failed test cases for final summary.
+ */
+function assert(condition, testName, details = '') {
+  if (condition) {
+    console.log(`✅ ${testName}`);
+    testResults.passed++;
+  } else {
+    console.log(`❌ ${testName}${details ? ' - ' + details : ''}`);
+    testResults.failed++;
+    testResults.failures.push({ testName, details });
+  }
+}
+
+/**
+ * Main test execution function.
+ * 
+ * Runs all test cases in sequence and provides a comprehensive
+ * summary of results. Tests are organized by functionality area
+ * for better maintainability and debugging.
+ */
+async function runTests() {
+  console.log('🚀 Starting QuoteSlate API Tests...\n');
+  console.log('=' .repeat(50));
+
+  try {
+    // =================================================================
+    // HEALTH ENDPOINT TESTS
+    // =================================================================
+    console.log('\n📋 Testing Health Endpoint...');
+    
+    const healthResponse = await makeRequest('/health');
+    assert(healthResponse.statusCode === 200, 'Health endpoint returns 200 status');
+    
+    let healthData;
+    try {
+      healthData = JSON.parse(healthResponse.body);
+      assert(true, 'Health endpoint returns valid JSON');
+    } catch (e) {
+      assert(false, 'Health endpoint returns valid JSON', e.message);
+      return;
+    }
+    
+    assert(healthData.status === 'healthy', 'Health status is "healthy"');
+    assert(healthData.version === '2.0.0', 'API version is 2.0.0');
+    assert(Array.isArray(healthData.features), 'Features array is present');
+    assert(healthData.timestamp, 'Timestamp is present');
+
+    // =================================================================
+    // RANDOM QUOTE ENDPOINT TESTS
+    // =================================================================
+    console.log('\n🎲 Testing Random Quote Endpoint...');
+    
+    const randomResponse = await makeRequest('/api/quotes/random');
+    assert(randomResponse.statusCode === 200, 'Random quote endpoint returns 200 status');
+    
+    let quoteData;
+    try {
+      quoteData = JSON.parse(randomResponse.body);
+      assert(true, 'Random quote endpoint returns valid JSON');
+    } catch (e) {
+      assert(false, 'Random quote endpoint returns valid JSON', e.message);
+      return;
+    }
+    
+    // Validate quote structure
+    assert(typeof quoteData.quote === 'string', 'Quote has text field');
+    assert(typeof quoteData.author === 'string', 'Quote has author field');
+    assert(Array.isArray(quoteData.tags), 'Quote has tags array');
+    assert(typeof quoteData.length === 'number', 'Quote has length field');
+    assert(typeof quoteData.id === 'number', 'Quote has ID field');
+    assert(quoteData.quote.length === quoteData.length, 'Quote length matches text length');
+
+    // =================================================================
+    // PARAMETER VALIDATION TESTS
+    // =================================================================
+    console.log('\n🔧 Testing Parameter Validation...');
+    
+    // Test count parameter
+    const multipleQuotes = await makeRequest('/api/quotes/random?count=3');
+    assert(multipleQuotes.statusCode === 200, 'Multiple quotes request succeeds');
+    
+    let multipleData;
+    try {
+      multipleData = JSON.parse(multipleQuotes.body);
+      assert(Array.isArray(multipleData), 'Multiple quotes returns array');
+      assert(multipleData.length === 3, 'Returns correct number of quotes');
+    } catch (e) {
+      assert(false, 'Multiple quotes returns valid JSON', e.message);
+    }
+    
+    // Test invalid count parameter
+    const invalidCount = await makeRequest('/api/quotes/random?count=999');
+    assert(invalidCount.statusCode === 400, 'Invalid count parameter rejected');
+
+    // =================================================================
+    // ERROR HANDLING TESTS
+    // =================================================================
+    console.log('\n⚠️  Testing Error Handling...');
+    
+    // Test non-existent endpoint
+    const notFound = await makeRequest('/api/nonexistent');
+    assert(notFound.statusCode === 404, 'Non-existent endpoint returns 404');
+    
+    // Test invalid author
+    const invalidAuthor = await makeRequest('/api/quotes/by-author/NonexistentAuthor123');
+    assert(invalidAuthor.statusCode === 404, 'Invalid author returns 404');
+
+    // =================================================================
+    // DOCUMENTATION ENDPOINT TESTS
+    // =================================================================
+    console.log('\n📚 Testing Documentation Endpoints...');
+    
+    const homePage = await makeRequest('/');
+    assert(homePage.statusCode === 200, 'Home page accessible');
+    
+    const docsPage = await makeRequest('/docs');
+    assert(docsPage.statusCode === 200, 'Documentation page accessible');
+    
+    const openApiSpec = await makeRequest('/openapi.yaml');
+    assert(openApiSpec.statusCode === 200, 'OpenAPI specification accessible');
+
+  } catch (error) {
+    console.error('❌ Test execution failed:', error.message);
+    testResults.failed++;
+    testResults.failures.push({ testName: 'Test execution', details: error.message });
+  }
+
+  // =================================================================
+  // TEST RESULTS SUMMARY
+  // =================================================================
+  printTestSummary();
+}
+
+/**
+ * Prints a comprehensive test results summary.
+ * 
+ * Displays:
+ * - Total test counts (passed/failed)
+ * - Success percentage
+ * - Detailed failure information
+ * - Overall test status
+ */
+function printTestSummary() {
+  const total = testResults.passed + testResults.failed;
+  const successRate = total > 0 ? ((testResults.passed / total) * 100).toFixed(1) : 0;
+
+  console.log('\n' + '=' .repeat(50));
+  console.log('📊 TEST RESULTS SUMMARY');
+  console.log('=' .repeat(50));
+  console.log(`✅ Passed: ${testResults.passed}`);
+  console.log(`❌ Failed: ${testResults.failed}`);
+  console.log(`📈 Total: ${total}`);
+  console.log(`🎯 Success Rate: ${successRate}%`);
+
+  if (testResults.failures.length > 0) {
+    console.log('\n❌ FAILED TESTS:');
+    testResults.failures.forEach((failure, index) => {
+      console.log(`${index + 1}. ${failure.testName}`);
+      if (failure.details) {
+        console.log(`   Details: ${failure.details}`);
+      }
+    });
+  }
+
+  console.log('\n' + '=' .repeat(50));
+  
+  if (testResults.failed === 0) {
+    console.log('🎉 ALL TESTS PASSED! API is working correctly!');
+    process.exit(0);
+  } else {
+    console.log('⚠️  Some tests failed. Please review the failures above.');
+    process.exit(1);
+  }
+}
+
+// =============================================================================
+// TEST EXECUTION
+// =============================================================================
+
+// Run tests if this file is executed directly
+if (require.main === module) {
+  runTests().catch((error) => {
+    console.error('💥 Fatal error during test execution:', error);
+    process.exit(1);
   });
 }
 
