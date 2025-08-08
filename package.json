@@ -1,7 +1,7 @@
 {
   "name": "QuoteSlate",
-  "version": "2.0.0",
-  "description": "A simple Quotes API.",
+  "version": "2.1.0",
+  "description": "A robust REST API for inspirational quotes with advanced filtering, pagination, and search capabilities",
   "main": "src/index.js",
   "author": {
     "name": "Musheer Alam",
@@ -19,14 +19,18 @@
   "license": "MIT",
   "scripts": {
     "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
     "test": "node tests/api.test.js",
-    "test:comprehensive": "node tests/final-tests.js",
-    "test:basic": "node tests/api.test.js"
+    "test:basic": "node tests/api.test.js",
+    "test:comprehensive": "node tests/comprehensive.test.js"
   },
   "dependencies": {
     "express": "^5.1.0",
     "cors": "^2.8.5",
     "express-rate-limit": "^8.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
   },
   "keywords": [
     "quotes",
@@ -34,6 +38,10 @@
     "inspirational",
     "rest-api",
     "express",
-    "nodejs"
+    "nodejs",
+    "motivation",
+    "wisdom",
+    "pagination",
+    "search"
   ]
 }
