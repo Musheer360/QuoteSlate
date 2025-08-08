@@ -227,18 +227,73 @@ function validateStringParam(value, paramName) {
     return { error: `${paramName} cannot be empty.` };
   }
   
-  // For search parameters, allow more characters but sanitize dangerous ones
+  // Check for maximum length to prevent abuse
+  const maxLengths = {
+    'search': 500,
+    'author': 200,
+    'tag': 100,
+    'authors': 1000,
+    'tags': 500
+  };
+  
+  const maxLength = maxLengths[paramName] || 200;
+  if (trimmed.length > maxLength) {
+    return { error: `${paramName} is too long. Maximum length is ${maxLength} characters.` };
+  }
+  
+  // Check for potentially dangerous characters that could indicate injection attempts
+  const dangerousPatterns = [
+    /[<>\"'&]/,           // XSS characters
+    /[;]/,                // SQL statement separators
+    /--/,                 // SQL comments
+    /\/\*/,               // SQL block comments
+    /\*\//,               // SQL block comment end
+    /union\s+select/i,    // SQL union attacks
+    /drop\s+table/i,      // SQL drop table
+    /delete\s+from/i,     // SQL delete
+    /insert\s+into/i,     // SQL insert
+    /update\s+set/i,      // SQL update
+    /script/i,            // Script tags
+    /javascript:/i,       // JavaScript protocol
+    /vbscript:/i,         // VBScript protocol
+    /on\w+\s*=/i         // Event handlers
+  ];
+  
+  // For search parameters, be more lenient but still check for dangerous patterns
   if (paramName === 'search') {
-    // Allow common punctuation and special characters for search
-    // Only remove potentially dangerous characters for XSS prevention
-    const sanitized = trimmed.replace(/[<>\"']/g, '');
+    // Only check for the most dangerous patterns for search
+    const searchDangerousPatterns = [
+      /[<>]/,               // XSS angle brackets
+      /script/i,            // Script tags
+      /javascript:/i,       // JavaScript protocol
+      /on\w+\s*=/i         // Event handlers
+    ];
+    
+    for (const pattern of searchDangerousPatterns) {
+      if (pattern.test(trimmed)) {
+        return { error: `${paramName} contains potentially dangerous characters.` };
+      }
+    }
+    
+    // Remove quotes and other potentially problematic characters but allow most punctuation
+    const sanitized = trimmed.replace(/[\"']/g, '');
     return { value: sanitized };
   }
   
-  // For other parameters, be more restrictive
-  const sanitized = trimmed.replace(/[<>\"'&]/g, '');
-  if (sanitized !== trimmed) {
-    return { error: `${paramName} contains invalid characters.` };
+  // For other parameters (author, tag, etc.), be more strict
+  for (const pattern of dangerousPatterns) {
+    if (pattern.test(trimmed)) {
+      return { error: `${paramName} contains invalid or potentially dangerous characters.` };
+    }
+  }
+  
+  // Additional check for author and tag parameters - only allow safe characters
+  if (paramName === 'author' || paramName === 'tag') {
+    // Allow letters, numbers, spaces, hyphens, apostrophes, periods, and common punctuation
+    const allowedPattern = /^[a-zA-Z0-9\s\-'.,()&\u00C0-\u017F\u0100-\u024F]+$/;
+    if (!allowedPattern.test(trimmed)) {
+      return { error: `${paramName} contains invalid characters. Only letters, numbers, spaces, and common punctuation are allowed.` };
+    }
   }
   
   return { value: trimmed };
