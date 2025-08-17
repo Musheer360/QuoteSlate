@@ -72,16 +72,19 @@ function validateNumericParam(value, paramName, min = null, max = null) {
     return { error: `${paramName} must be a valid integer.` };
   }
 
-  const num = parseInt(valueStr, 10);
+  const num = Number(valueStr);
+  if (Number.isNaN(num)) {
+    return { error: `${paramName} must be a valid integer.` };
+  }
 
   if (min !== null && num < min) {
     return { error: `${paramName} must be greater than or equal to ${min}.` };
   }
-  
+
   if (max !== null && num > max) {
     return { error: `${paramName} must be less than or equal to ${max}.` };
   }
-  
+
   return { value: num };
 }
 
