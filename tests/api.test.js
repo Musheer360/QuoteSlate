@@ -74,6 +74,9 @@ async function runTests() {
     const invalidCountResponse = await makeRequest('/api/quotes/random?count=0');
     test('Invalid count parameter rejected', invalidCountResponse.statusCode === 400);
 
+    const nonNumericCountResponse = await makeRequest('/api/quotes/random?count=5a');
+    test('Non-numeric count parameter rejected', nonNumericCountResponse.statusCode === 400);
+
     const negativeMinResponse = await makeRequest('/api/quotes/random?minLength=-50');
     test('Negative minLength rejected', negativeMinResponse.statusCode === 400);
 
