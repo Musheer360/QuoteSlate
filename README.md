@@ -375,11 +375,17 @@ Response format:
     }
     ```
     
--   Count validation:
-    
+-   Count validation: The API returns different messages depending on which bound is violated.
+
     ```json
     {
-      "error": "Count must be a number between 1 and 50."
+      "error": "count must be greater than or equal to 1."
+    }
+    ```
+
+    ```json
+    {
+      "error": "count must be less than or equal to 50."
     }
     ```
 
