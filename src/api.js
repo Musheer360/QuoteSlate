@@ -66,12 +66,14 @@ const validTagsSet = new Set(tagsData);
 // Helper function to validate numeric parameter
 function validateNumericParam(value, paramName, min = null, max = null) {
   if (value === null || value === undefined) return null;
-  
-  const num = parseInt(value);
-  if (isNaN(num)) {
-    return { error: `${paramName} must be a valid number.` };
+
+  const valueStr = String(value).trim();
+  if (!/^\d+$/.test(valueStr)) {
+    return { error: `${paramName} must be a valid integer.` };
   }
-  
+
+  const num = parseInt(valueStr, 10);
+
   if (min !== null && num < min) {
     return { error: `${paramName} must be greater than or equal to ${min}.` };
   }
