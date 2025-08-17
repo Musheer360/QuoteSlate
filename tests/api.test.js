@@ -77,6 +77,12 @@ async function runTests() {
     const nonNumericCountResponse = await makeRequest('/api/quotes/random?count=5a');
     test('Non-numeric count parameter rejected', nonNumericCountResponse.statusCode === 400);
 
+    const alphaNumericCountResponse = await makeRequest('/api/quotes/random?count=10abc');
+    test('Alphanumeric count parameter rejected', alphaNumericCountResponse.statusCode === 400);
+
+    const exponentialCountResponse = await makeRequest('/api/quotes/random?count=5e2');
+    test('Exponential notation count parameter rejected', exponentialCountResponse.statusCode === 400);
+
     const negativeMinResponse = await makeRequest('/api/quotes/random?minLength=-50');
     test('Negative minLength rejected', negativeMinResponse.statusCode === 400);
 
