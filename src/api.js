@@ -69,7 +69,7 @@ function validateNumericParam(value, paramName, min = null, max = null) {
 
   const valueStr = String(value).trim();
   if (!/^\d+$/.test(valueStr)) {
-    return { error: `${paramName} must be a valid integer.` };
+    return { error: `${paramName} must be a valid number.` };
   }
 
   const num = parseInt(valueStr, 10);

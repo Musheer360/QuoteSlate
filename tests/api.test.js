@@ -80,6 +80,13 @@ async function runTests() {
     const negativeMinResponse = await makeRequest('/api/quotes/random?minLength=-50');
     test('Negative minLength rejected', negativeMinResponse.statusCode === 400);
 
+    const malformedCountResponse = await makeRequest('/api/quotes/random?count=10abc');
+    test(
+      'Malformed count parameter rejected with valid number error',
+      malformedCountResponse.statusCode === 400 &&
+        malformedCountResponse.body.includes('valid number')
+    );
+
     const invalidMethodResponse = await makeRequest('/api/quotes/random', 'POST');
     test('Invalid HTTP method returns 405', invalidMethodResponse.statusCode === 405);
 
