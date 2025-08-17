@@ -48,15 +48,15 @@ The QuoteSlate API is a labor of love, provided free of charge to support the de
 **Here's how you can help:**
 
 1. **Optimize Your Requests and Cache Quotes:** Please make use of the `count` parameter to fetch multiple quotes (up to 50) in a single request whenever possible. This significantly reduces the load on the server. **Furthermore, cache the quotes you fetch locally in your application.** For example, if your app displays 5 quotes per day, fetching and caching 50 quotes means you'll have enough for 10 days without needing to make another API call. This not only reduces server load but also makes your app more resilient – if the API experiences downtime, your app can continue functioning using the cached quotes as long as the cache is intact.
-    
+
 2. **Commercial or Public Use? Deploy Your Own:** I understand the temptation to use the default endpoint (`quoteslate.vercel.app`) – it's definitely the easiest option. However, this endpoint is designed for hobbyists creating projects primarily for their own use or very small-scale applications. **If your project is commercial, intended for public use, or will generate a significant number of API calls, it is crucial that you fork this repository and deploy your own instance on Vercel.**  It's easy and free for most use cases! This gives you dedicated resources, ensures you won't be impacted by rate limits, and helps keep the public endpoint sustainable for everyone. **For very high-volume applications, you can even create multiple deployments on Vercel and implement load balancing on your app's end to distribute requests across them.** Think of QuoteSlate as _our_ project, not just mine. If you are building something that requires a lot of requests, take ownership and deploy your instance. If usage continues to grow as it has been, I may need to upgrade to Vercel's paid Pro plan in the future, which is a significant cost for me as a student. Deploying your own instance, when needed, is the most responsible and sustainable way to use the API for high-volume projects. Detailed instructions are in the [Deploying on Vercel](#deploying-on-vercel-easiest-for-high-volume-needs) section.
-    
+
 3. **Give Credit Where It's Due:** I don't ask for payment, but proper attribution is essential. If you use the QuoteSlate API in your project, please include a brief acknowledgment, such as:
-    
+
     > "Quotes powered by the [QuoteSlate API](https://github.com/Musheer360/QuoteSlate)"
     >
     > "This project uses the QuoteSlate API, a free and open-source quote API. Check it out [here](https://github.com/Musheer360/QuoteSlate)"
-    
+
 4. **Show Your Support:** A simple star on this GitHub repository goes a long way in helping others discover the project and growing the community.
 
 **Why This Matters:**
@@ -105,19 +105,19 @@ fetch('https://quoteslate.vercel.app/api/quotes/random')
 If your project is commercial, intended for public use, or requires a large number of API calls, deploying your own instance on Vercel is **strongly recommended**. Here's how:
 
 1. **Fork the Repository:** Click the "Fork" button at the top right of the main page of this repository to create a copy for yourself.
-    
+
 2. **Go to Your Vercel Dashboard:** Log in to your Vercel account (or create one – it's free!).
-    
+
 3. **Create a New Project:** Click the "New Project" button.
-    
+
 4. **Import Your Forked Repository:** In the "Import Git Repository" section, select your forked QuoteSlate repository from the list.
-    
+
 5. **Configure the Project (Optional):** You can usually keep the default settings. Vercel will automatically detect that it's a Node.js project.
-    
+
 6. **Deploy!** Click the "Deploy" button. Vercel will build and deploy your API.
-    
+
 7. **Your Own Endpoint:** Once deployed, you'll be given a unique URL (an endpoint) for your own instance of the QuoteSlate API. Use this URL in your application instead of `quoteslate.vercel.app`.
-    
+
 8. **(Optional) Multiple Deployments for Very High Volume:** If your project has extremely high request needs, you can create multiple deployments on Vercel by repeating steps 3-7 with different project names, each creating its own unique URL. Then implement load balancing on your app's end to distribute requests across these endpoints.
 
 **It's that simple!** Vercel handles all the complexity of hosting and scaling for you. You get your own dedicated resources and won't have to worry about rate limits on the public endpoint. For detailed instructions, refer to [Vercel's documentation](https://vercel.com/docs).
@@ -127,43 +127,43 @@ If your project is commercial, intended for public use, or requires a large numb
 Follow these steps to run the API on your local machine:
 
 1. **Prerequisites**
-    
+
     -   Node.js (v14 or higher)
     -   npm (Node Package Manager)
-    
+
 2. **Clone the Repository**
-    
+
     ```bash
     git clone https://github.com/Musheer360/QuoteSlate.git
     cd QuoteSlate
     ```
-    
+
 3. **Install Dependencies**
-    
+
     ```bash
     npm install
     ```
-    
+
 4. **Required Files**
-    
+
     Ensure you have the following JSON files in your root directory:
-    
+
     -   `quotes.json` - Contains the quotes data
     -   `authors.json` - Contains author names and their quote counts
     -   `tags.json` - Contains available tags
-    
+
 5. **Start the Server**
-    
+
     ```bash
     npm start
     ```
-    
+
     The API will be available at `http://localhost:3000`
-    
+
 6. **Development Mode**
-    
+
     For development with auto-reload:
-    
+
     ```bash
     npm run dev
     ```
@@ -300,39 +300,39 @@ Response format:
 ### Basic Examples
 
 1. **Single Random Quote**
-    
+
     ```http
     GET /api/quotes/random
     ```
-    
+
 2. **Multiple Random Quotes**
-    
+
     ```http
     GET /api/quotes/random?count=5
     ```
-    
+
 ### Advanced Filtering
 
 1. **Quotes by Specific Authors**
-    
+
     ```http
     GET /api/quotes/random?authors=Babe%20Ruth,Maya%20Angelou&count=3
     ```
-    
+
 2. **Quotes with Specific Tags**
-    
+
     ```http
     GET /api/quotes/random?tags=motivation,wisdom&count=2
     ```
-    
+
 3. **Length-Constrained Quotes**
-    
+
     ```http
     GET /api/quotes/random?minLength=50&maxLength=150
     ```
-    
+
 4. **Combined Filters**
-    
+
     ```http
     GET /api/quotes/random?authors=Babe%20Ruth&tags=wisdom&count=3&minLength=50
     ```
@@ -341,13 +341,13 @@ Response format:
 
 ### HTTP Status Codes
 
-| Status Code | Description                                                                                                                                                      |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 200         | Successful request                                                                                                                                               |
-| 400         | Invalid parameters or incompatible filters                                                                                                                       |
-| 404         | No matching quotes found                                                                                                                                         |
-| 429         | Rate limit exceeded. Please use the `count` parameter to optimize your requests and cache the results. For high-volume needs, deploy your own instance of the API. |
-| 500         | Internal server error                                                                                                                                            |
+| Status Code | Description |
+| ----------- | ---------------------------------------------------------------------------------------------------------------- |
+| 200 | Successful request |
+| 400 | Invalid parameters or incompatible filters |
+| 404 | No matching quotes found |
+| 429 | Rate limit exceeded. Please use the `count` parameter to optimize your requests and cache the results. For high-volume needs, deploy your own instance of the API. |
+| 500 | Internal server error |
 
 ### Error Response Format
 
@@ -360,23 +360,23 @@ Response format:
 ### Common Error Messages
 
 -   Invalid authors:
-    
+
     ```json
     {
       "error": "Invalid author(s): Unknown Author, Another Invalid"
     }
     ```
-    
+
 -   Invalid tags:
-    
+
     ```json
     {
       "error": "Invalid tag(s): invalid1, invalid2"
     }
     ```
-    
+
 -   Count validation:
-    
+
     ```json
     {
       "error": "Count must be a number between 1 and 50."
