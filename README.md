@@ -107,20 +107,19 @@ fetch('https://quoteslate.vercel.app/api/quotes/random')
 
 If your project is commercial, intended for public use, or requires a large number of API calls, deploying your own instance on Vercel is **strongly recommended**. Here's how:
 
+#### One-click Deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Musheer360/QuoteSlate)
+
+#### Manual Deployment
+
 1. **Fork the Repository:** Click the "Fork" button at the top right of the main page of this repository to create a copy for yourself.
-
 2. **Go to Your Vercel Dashboard:** Log in to your Vercel account (or create one – it's free!).
-
 3. **Create a New Project:** Click the "New Project" button.
-
 4. **Import Your Forked Repository:** In the "Import Git Repository" section, select your forked QuoteSlate repository from the list.
-
 5. **Configure the Project (Optional):** You can usually keep the default settings. Vercel will automatically detect that it's a Node.js project.
-
 6. **Deploy!** Click the "Deploy" button. Vercel will build and deploy your API.
-
 7. **Your Own Endpoint:** Once deployed, you'll be given a unique URL (an endpoint) for your own instance of the QuoteSlate API. Use this URL in your application instead of `quoteslate.vercel.app`.
-
 8. **(Optional) Multiple Deployments for Very High Volume:** If your project has extremely high request needs, you can create multiple deployments on Vercel by repeating steps 3-7 with different project names, each creating its own unique URL. Then implement load balancing on your app's end to distribute requests across these endpoints.
 
 **It's that simple!** Vercel handles all the complexity of hosting and scaling for you. You get your own dedicated resources and won't have to worry about rate limits on the public endpoint. For detailed instructions, refer to [Vercel's documentation](https://vercel.com/docs).
