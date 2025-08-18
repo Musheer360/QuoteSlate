@@ -95,7 +95,7 @@ No API key is required. Simply make HTTP requests to the endpoints using your pr
 ### Quick Start Example
 
 ```javascript
-// Fetch a random quote
+// Retrieve a random quote
 fetch('https://quoteslate.vercel.app/api/quotes/random')
   .then(response => response.json())
   .then(data => console.log(data));
@@ -230,7 +230,7 @@ Response format:
   "Avery Brooks": 1,
   "Ayn Rand": 3,
   "Babe Ruth": 4,
-  // ... more authors with their quote counts
+  // additional authors and their quote totals
 }
 ```
 
@@ -248,7 +248,7 @@ Response format:
   "inspiration",
   "life",
   "wisdom",
-  // ... more tags
+  // additional tags
 ]
 ```
 
@@ -294,7 +294,7 @@ Response format:
     "length": 36,
     "tags": ["motivation"]
   }
-  // ... more quotes
+  // additional quotes
 ]
 ```
 

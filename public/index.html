@@ -581,27 +581,27 @@
 
                         let params = new URLSearchParams();
 
-                        // Append the count parameter when provided
+                        // Include the count parameter if set
                         const countInput =
                             container.querySelector(".count-input");
                         if (countInput && countInput.value.trim()) {
                             params.append("count", countInput.value.trim());
                         }
 
-                        // Append the tags parameter when provided
+                        // Include tags when a value is present
                         const tagInput = container.querySelector(".tag-input");
                         if (tagInput && tagInput.value.trim()) {
                             params.append("tags", tagInput.value.trim());
                         }
 
-                        // Append the authors parameter when provided
+                        // Include authors when specified
                         const authorInput =
                             container.querySelector(".author-input");
                         if (authorInput && authorInput.value.trim()) {
                             params.append("authors", authorInput.value.trim());
                         }
 
-                        // Append length parameters, mirroring the range input behavior
+                        // Add length filters similar to range input behavior
                         const lengthInputs = container.querySelectorAll(
                             ".param-input:not(.count-input)",
                         );
