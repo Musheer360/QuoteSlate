@@ -5,13 +5,13 @@ const fs = require("fs");
 const rateLimit = require("express-rate-limit");
 const app = express();
 
-// Respect proxy headers so the application can resolve the original client IP
+// Honor proxy headers so req.ip reflects the true client address
 app.set("trust proxy", 1);
 
-// Allow cross-origin requests across all routes
+// Enable CORS for every route
 app.use(cors());
 
-// Apply basic security headers to each response
+// Add a few protective headers to each response
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
@@ -19,18 +19,18 @@ app.use((req, res, next) => {
   next();
 });
 
-// Log the client's IP address for each incoming request
+// Log each request along with the resolved client IP
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] Request from IP: ${req.ip}`);
   next();
 });
 
-// Configure rate limiting for abuse protection
+// Optional request throttling to discourage abuse
 const enableRateLimit = process.env.ENABLE_RATE_LIMIT !== "false";
 if (enableRateLimit) {
   const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15-minute window
-    max: 100, // Maximum requests per IP for the time window
+    windowMs: 15 * 60 * 1000, // 15 minute rolling window
+    max: 100, // allow up to 100 hits per IP in that window
     standardHeaders: true,
     legacyHeaders: false,
     message: {
@@ -38,35 +38,35 @@ if (enableRateLimit) {
     },
   });
 
-  // Enforce rate limits on API routes
+  // Attach the limiter to all /api endpoints
   app.use("/api/", apiLimiter);
 }
 
-// Load quote data at startup
+// Read quote data from disk during startup
 const quotesData = JSON.parse(
   fs.readFileSync(path.join(__dirname, "../data/quotes.json"), "utf8"),
 );
 
-// Load author data at startup
+// Read author information into memory
 const authorsData = JSON.parse(
   fs.readFileSync(path.join(__dirname, "../data/authors.json"), "utf8"),
 );
 
-// Load tag data at startup
+// Load the list of tags once
 const tagsData = JSON.parse(
   fs.readFileSync(path.join(__dirname, "../data/tags.json"), "utf8"),
 );
 
-// Build a lookup map to normalize author names
+// Create a map to resolve lowercase author names to their canonical form
 const authorMap = {};
 Object.keys(authorsData).forEach((author) => {
   authorMap[author.toLowerCase()] = author;
 });
 
-// Create a set of valid tags for quick validation
+// Prepare a Set for fast tag validation
 const validTagsSet = new Set(tagsData);
 
-// Validate numeric query parameters
+// Safely parse numeric query parameters
 function validateNumericParam(value, paramName, min = null, max = null) {
   if (value === null || value === undefined) return null;
 
@@ -91,18 +91,18 @@ function validateNumericParam(value, paramName, min = null, max = null) {
   return { value: num };
 }
 
-// Normalize an author string for comparison
+// Standardize an author string for comparison
 function normalizeAuthorName(author) {
   return decodeURIComponent(author).trim().toLowerCase();
 }
 
-// Trim and validate string-based query parameters
+// Clean up and verify string query parameters
 function validateStringParam(value, paramName) {
   if (!value || value.trim() === '') return null;
   return value.trim();
 }
 
-// Determine whether a quote was written by any requested author
+// Check if a quote's author matches any requested name
 function hasMatchingAuthor(quote, requestedAuthors) {
   if (!requestedAuthors) return true;
   const quoteAuthor = normalizeAuthorName(quote.author);
@@ -111,14 +111,14 @@ function hasMatchingAuthor(quote, requestedAuthors) {
   );
 }
 
-// Ensure a quote contains all requested tags
+// Verify that a quote includes all required tags
 function hasMatchingTags(quote, requestedTags) {
   if (!requestedTags) return true;
   const quoteTags = new Set(quote.tags);
   return requestedTags.every((tag) => quoteTags.has(tag));
 }
 
-// Retrieve quotes that satisfy the supplied criteria
+// Return quotes that satisfy the provided filters
 function getQuotes({
   maxLength = null,
   minLength = null,
@@ -128,19 +128,19 @@ function getQuotes({
 } = {}) {
   let validQuotes = [...quotesData];
 
-  // Filter by author when a list is supplied
+  // Apply author filtering when specified
   if (authors) {
     validQuotes = validQuotes.filter((quote) =>
       hasMatchingAuthor(quote, authors),
     );
   }
 
-  // Filter by tags when provided
+  // Apply tag filtering if tags are supplied
   if (tags) {
     validQuotes = validQuotes.filter((quote) => hasMatchingTags(quote, tags));
   }
 
-  // Apply length constraints
+  // Enforce min and max length constraints
   if (minLength !== null) {
     validQuotes = validQuotes.filter((quote) => quote.length >= minLength);
   }
@@ -149,15 +149,15 @@ function getQuotes({
     validQuotes = validQuotes.filter((quote) => quote.length <= maxLength);
   }
 
-  // Return null when no quotes remain after filtering
+  // Bail out if filtering removed all quotes
   if (validQuotes.length === 0) {
     return null;
   }
 
-  // Limit the requested count to the available number of quotes
+  // Ensure count doesn't exceed number of available quotes
   count = Math.min(count, validQuotes.length);
 
-  // Choose random quotes without repetition
+  // Randomly pick quotes without repeating
   const quotes = [];
   const tempQuotes = [...validQuotes];
 
@@ -170,41 +170,41 @@ function getQuotes({
   return quotes;
 }
 
-// Expose the list of authors and their quote counts
+// Endpoint that lists authors and their quote totals
 app.get("/api/authors", (req, res) => {
-  // Respond using the preloaded author data
+  // Serve the author data loaded at startup
   res.json(authorsData);
 });
 
-// Reject non-GET methods for the authors route
+// Only allow GET requests on the authors endpoint
 app.all("/api/authors", (req, res) => {
   res.status(405).json({ error: `Method ${req.method} not allowed for this endpoint.` });
 });
 
-// Expose the list of available tags
+// Endpoint that lists all available tags
 app.get("/api/tags", (req, res) => {
-  // Respond using the preloaded tag data
+  // Serve the tag data loaded at startup
   res.json(tagsData);
 });
 
-// Reject non-GET methods for the tags route
+// Only allow GET requests on the tags endpoint
 app.all("/api/tags", (req, res) => {
   res.status(405).json({ error: `Method ${req.method} not allowed for this endpoint.` });
 });
 
-// Serve the OpenAPI specification
+// Provide the OpenAPI document
 app.get("/api/openapi.json", (req, res) => {
   res.sendFile(path.join(__dirname, "../openapi.json"));
 });
 
-// Reject non-GET methods for the OpenAPI spec
+// Only GET is supported for the spec route
 app.all("/api/openapi.json", (req, res) => {
   res.status(405).json({ error: `Method ${req.method} not allowed for this endpoint.` });
 });
 
-// Endpoint for retrieving random quotes
+// Route for fetching random quotes
 app.get("/api/quotes/random", (req, res) => {
-  // Validate numeric query parameters
+  // Parse and verify numeric query parameters
   const maxLengthValidation = validateNumericParam(req.query.maxLength, 'maxLength', 1);
   if (maxLengthValidation && maxLengthValidation.error) {
     return res.status(400).json({ error: maxLengthValidation.error });
@@ -223,17 +223,17 @@ app.get("/api/quotes/random", (req, res) => {
   }
   const count = countValidation ? countValidation.value : 1;
 
-  // Parse and clean string-based query parameters
+  // Split and sanitize string-based query parameters
   const tagsParam = validateStringParam(req.query.tags, 'tags');
   const tags = tagsParam ? tagsParam.split(",").map((tag) => tag.toLowerCase().trim()).filter(Boolean) : null;
-  
+
   const authorsParam = validateStringParam(req.query.authors, 'authors');
   const authors = authorsParam ? authorsParam.split(",").map((author) => author.trim()).filter(Boolean) : null;
 
-  // Validate authors when the authors parameter is supplied
+  // If authors are supplied, ensure each one is recognized
   if (authors) {
-    // Use the precomputed author map for case-insensitive matching
-    // Convert authors to canonical case and track invalid entries
+    // Use authorMap for case-insensitive lookup
+    // Normalize names and capture any unknown authors
       const processedAuthors = [];
       const invalidAuthors = [];
 
@@ -252,24 +252,24 @@ app.get("/api/quotes/random", (req, res) => {
         });
       }
 
-      // Overwrite the authors array with normalized values
+      // Replace provided authors with their canonical forms
       authors.splice(0, authors.length, ...processedAuthors);
-    // Author data is loaded at startup; additional error handling is unnecessary here
+    // Author information is already loaded; no further checks needed
   }
 
-  // Validate tags when the tags parameter is supplied
+  // If tags are provided, verify they are valid
   if (tags) {
-    // Use the precomputed tag set for validation
+    // Check each tag against the Set of known tags
     const invalidTags = tags.filter((tag) => !validTagsSet.has(tag));
     if (invalidTags.length > 0) {
       return res.status(400).json({
         error: `Invalid tag(s): ${invalidTags.join(", ")}`,
       });
     }
-    // Tag data is loaded at startup; extra error handling is not required
+    // Tags are preloaded so additional validation isn't necessary
   }
 
-  // Ensure minLength does not exceed maxLength
+  // Ensure minLength is not greater than maxLength
   if (minLength !== null && maxLength !== null && minLength > maxLength) {
     return res.status(400).json({
       error: "minLength must be less than or equal to maxLength.",
@@ -285,17 +285,17 @@ app.get("/api/quotes/random", (req, res) => {
   }
 });
 
-// Reject unsupported methods for the quotes route
+// Deny non-GET methods for the quotes endpoint
 app.all("/api/quotes/random", (req, res) => {
   res.status(405).json({ error: `Method ${req.method} not allowed for this endpoint.` });
 });
 
-// Serve the documentation page
+// Deliver the documentation page
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/index.html"));
 });
 
-// Return a 404 response for any unmatched API route
+// Return 404 for any other /api requests
 app.use("/api", (req, res) => {
   res.status(404).json({ error: "API endpoint not found." });
 });

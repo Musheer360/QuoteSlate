@@ -156,7 +156,7 @@ async function runTests() {
 
   let server;
   try {
-    // Run tests with rate limiting disabled
+    // Execute tests with rate limiting turned off
     server = await startServer({ ENABLE_RATE_LIMIT: 'false' });
     await runBasicTests(test);
     await testRateLimitDisabled(test);
@@ -167,7 +167,7 @@ async function runTests() {
   }
 
   try {
-    // Run rate limit check with limiter enabled
+    // Verify limiter behavior when it is enabled
     server = await startServer({ ENABLE_RATE_LIMIT: 'true' });
     await testRateLimitEnabled(test);
   } finally {
