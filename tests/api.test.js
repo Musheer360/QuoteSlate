@@ -52,7 +52,7 @@ async function runTests() {
   }
 
   try {
-    // Test basic functionality
+    // Verify core endpoints behave as expected
     console.log('Testing basic functionality:');
     const randomQuoteResponse = await makeRequest('/api/quotes/random');
     test('Random quote endpoint returns 200', randomQuoteResponse.statusCode === 200);
@@ -68,7 +68,7 @@ async function runTests() {
 
     console.log();
 
-    // Test error handling
+    // Verify error responses for invalid requests
     console.log('Testing error handling:');
     
     const invalidCountResponse = await makeRequest('/api/quotes/random?count=0');
@@ -101,7 +101,7 @@ async function runTests() {
 
     console.log();
 
-    // Test security headers
+    // Confirm security headers are present
     console.log('Testing security headers:');
     test('X-Content-Type-Options header present', randomQuoteResponse.headers['x-content-type-options'] === 'nosniff');
     test('X-Frame-Options header present', randomQuoteResponse.headers['x-frame-options'] === 'DENY');
@@ -109,7 +109,7 @@ async function runTests() {
 
     console.log();
 
-    // Summary
+    // Display a summary of test results
     console.log('=== Test Summary ===');
     console.log(`${testsPassed}/${totalTests} tests passed`);
     
@@ -127,7 +127,7 @@ async function runTests() {
   }
 }
 
-// Check if server is running before running tests
+// Ensure the server is running before executing tests
 makeRequest('/api/quotes/random')
   .then(() => {
     runTests();

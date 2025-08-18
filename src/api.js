@@ -5,13 +5,13 @@ const fs = require("fs");
 const rateLimit = require("express-rate-limit");
 const app = express();
 
-// Trust the proxy to get the real client IP
+// Respect proxy headers so the application can resolve the original client IP
 app.set("trust proxy", 1);
 
-// Enable CORS for all routes
+// Allow cross-origin requests across all routes
 app.use(cors());
 
-// Add security headers
+// Apply basic security headers to each response
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
@@ -19,16 +19,16 @@ app.use((req, res, next) => {
   next();
 });
 
-// Add IP logging middleware
+// Log the client's IP address for each incoming request
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] Request from IP: ${req.ip}`);
   next();
 });
 
-// Rate limiter configuration
+// Configure rate limiting for abuse protection
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000, // 15-minute window
+  max: 100, // Maximum requests per IP for the time window
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -36,34 +36,34 @@ const apiLimiter = rateLimit({
   },
 });
 
-// Apply rate limiting to all API routes
+// Enforce rate limits on API routes
 app.use("/api/", apiLimiter);
 
-// Load quotes data
+// Load quote data at startup
 const quotesData = JSON.parse(
   fs.readFileSync(path.join(__dirname, "../data/quotes.json"), "utf8"),
 );
 
-// Load authors data
+// Load author data at startup
 const authorsData = JSON.parse(
   fs.readFileSync(path.join(__dirname, "../data/authors.json"), "utf8"),
 );
 
-// Load tags data
+// Load tag data at startup
 const tagsData = JSON.parse(
   fs.readFileSync(path.join(__dirname, "../data/tags.json"), "utf8"),
 );
 
-// Pre-compute authorMap for efficient lookup
+// Build a lookup map to normalize author names
 const authorMap = {};
 Object.keys(authorsData).forEach((author) => {
   authorMap[author.toLowerCase()] = author;
 });
 
-// Pre-compute validTagsSet for efficient lookup
+// Create a set of valid tags for quick validation
 const validTagsSet = new Set(tagsData);
 
-// Helper function to validate numeric parameter
+// Validate numeric query parameters
 function validateNumericParam(value, paramName, min = null, max = null) {
   if (value === null || value === undefined) return null;
 
@@ -88,18 +88,18 @@ function validateNumericParam(value, paramName, min = null, max = null) {
   return { value: num };
 }
 
-// Helper function to normalize author names
+// Normalize an author string for comparison
 function normalizeAuthorName(author) {
   return decodeURIComponent(author).trim().toLowerCase();
 }
 
-// Helper function to validate and sanitize string parameters
+// Trim and validate string-based query parameters
 function validateStringParam(value, paramName) {
   if (!value || value.trim() === '') return null;
   return value.trim();
 }
 
-// Helper function to check if a quote's author matches any of the requested authors
+// Determine whether a quote was written by any requested author
 function hasMatchingAuthor(quote, requestedAuthors) {
   if (!requestedAuthors) return true;
   const quoteAuthor = normalizeAuthorName(quote.author);
@@ -108,14 +108,14 @@ function hasMatchingAuthor(quote, requestedAuthors) {
   );
 }
 
-// Helper function to check if a quote matches all requested tags
+// Ensure a quote contains all requested tags
 function hasMatchingTags(quote, requestedTags) {
   if (!requestedTags) return true;
   const quoteTags = new Set(quote.tags);
   return requestedTags.every((tag) => quoteTags.has(tag));
 }
 
-// Main quote retrieval function
+// Retrieve quotes that satisfy the supplied criteria
 function getQuotes({
   maxLength = null,
   minLength = null,
@@ -125,19 +125,19 @@ function getQuotes({
 } = {}) {
   let validQuotes = [...quotesData];
 
-  // Filter by authors if provided
+  // Filter by author when a list is supplied
   if (authors) {
     validQuotes = validQuotes.filter((quote) =>
       hasMatchingAuthor(quote, authors),
     );
   }
 
-  // Filter by tags if provided
+  // Filter by tags when provided
   if (tags) {
     validQuotes = validQuotes.filter((quote) => hasMatchingTags(quote, tags));
   }
 
-  // Apply length filters
+  // Apply length constraints
   if (minLength !== null) {
     validQuotes = validQuotes.filter((quote) => quote.length >= minLength);
   }
@@ -146,15 +146,15 @@ function getQuotes({
     validQuotes = validQuotes.filter((quote) => quote.length <= maxLength);
   }
 
-  // If no quotes match the criteria after all filters, return null
+  // Return null when no quotes remain after filtering
   if (validQuotes.length === 0) {
     return null;
   }
 
-  // If requesting more quotes than available, return all available quotes
+  // Limit the requested count to the available number of quotes
   count = Math.min(count, validQuotes.length);
 
-  // Get random quotes
+  // Choose random quotes without repetition
   const quotes = [];
   const tempQuotes = [...validQuotes];
 
@@ -167,31 +167,41 @@ function getQuotes({
   return quotes;
 }
 
-// Get list of all available authors with their quote counts
+// Expose the list of authors and their quote counts
 app.get("/api/authors", (req, res) => {
-  // Use pre-loaded authorsData
+  // Respond using the preloaded author data
   res.json(authorsData);
 });
 
-// Handle non-GET methods for authors endpoint
+// Reject non-GET methods for the authors route
 app.all("/api/authors", (req, res) => {
   res.status(405).json({ error: `Method ${req.method} not allowed for this endpoint.` });
 });
 
-// Get list of all available tags
+// Expose the list of available tags
 app.get("/api/tags", (req, res) => {
-  // Use pre-loaded tagsData
+  // Respond using the preloaded tag data
   res.json(tagsData);
 });
 
-// Handle non-GET methods for tags endpoint
+// Reject non-GET methods for the tags route
 app.all("/api/tags", (req, res) => {
   res.status(405).json({ error: `Method ${req.method} not allowed for this endpoint.` });
 });
 
-// Main quote endpoint
+// Serve the OpenAPI specification
+app.get("/api/openapi.json", (req, res) => {
+  res.sendFile(path.join(__dirname, "../openapi.json"));
+});
+
+// Reject non-GET methods for the OpenAPI spec
+app.all("/api/openapi.json", (req, res) => {
+  res.status(405).json({ error: `Method ${req.method} not allowed for this endpoint.` });
+});
+
+// Endpoint for retrieving random quotes
 app.get("/api/quotes/random", (req, res) => {
-  // Validate and parse numeric parameters
+  // Validate numeric query parameters
   const maxLengthValidation = validateNumericParam(req.query.maxLength, 'maxLength', 1);
   if (maxLengthValidation && maxLengthValidation.error) {
     return res.status(400).json({ error: maxLengthValidation.error });
@@ -210,17 +220,17 @@ app.get("/api/quotes/random", (req, res) => {
   }
   const count = countValidation ? countValidation.value : 1;
 
-  // Validate and parse string parameters
+  // Parse and clean string-based query parameters
   const tagsParam = validateStringParam(req.query.tags, 'tags');
   const tags = tagsParam ? tagsParam.split(",").map((tag) => tag.toLowerCase().trim()).filter(Boolean) : null;
   
   const authorsParam = validateStringParam(req.query.authors, 'authors');
   const authors = authorsParam ? authorsParam.split(",").map((author) => author.trim()).filter(Boolean) : null;
 
-  // Validate authors only if authors parameter is provided
+  // Validate authors when the authors parameter is supplied
   if (authors) {
-    // Use pre-computed global authorMap
-    // Check for invalid authors and convert to proper case
+    // Use the precomputed author map for case-insensitive matching
+    // Convert authors to canonical case and track invalid entries
       const processedAuthors = [];
       const invalidAuthors = [];
 
@@ -239,26 +249,24 @@ app.get("/api/quotes/random", (req, res) => {
         });
       }
 
-      // Replace the authors array with the properly cased versions
+      // Overwrite the authors array with normalized values
       authors.splice(0, authors.length, ...processedAuthors);
-    // Removed catch block as authorsData is pre-loaded,
-    // though other errors during processing might still occur.
-    // Consider if specific error handling for author processing is needed.
+    // Author data is loaded at startup; additional error handling is unnecessary here
   }
 
-  // Validate tags only if tags parameter is provided
+  // Validate tags when the tags parameter is supplied
   if (tags) {
-    // Use pre-computed global validTagsSet
+    // Use the precomputed tag set for validation
     const invalidTags = tags.filter((tag) => !validTagsSet.has(tag));
     if (invalidTags.length > 0) {
       return res.status(400).json({
         error: `Invalid tag(s): ${invalidTags.join(", ")}`,
       });
     }
-    // Removed catch block as tagsData is pre-loaded.
+    // Tag data is loaded at startup; extra error handling is not required
   }
 
-  // Validate length parameters if both are provided
+  // Ensure minLength does not exceed maxLength
   if (minLength !== null && maxLength !== null && minLength > maxLength) {
     return res.status(400).json({
       error: "minLength must be less than or equal to maxLength.",
@@ -274,17 +282,17 @@ app.get("/api/quotes/random", (req, res) => {
   }
 });
 
-// Handle non-GET methods for quotes endpoint
+// Reject unsupported methods for the quotes route
 app.all("/api/quotes/random", (req, res) => {
   res.status(405).json({ error: `Method ${req.method} not allowed for this endpoint.` });
 });
 
-// Home page route
+// Serve the documentation page
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/index.html"));
 });
 
-// Handle 404 for API routes - this should be a catch-all for unmatched API routes
+// Return a 404 response for any unmatched API route
 app.use("/api", (req, res) => {
   res.status(404).json({ error: "API endpoint not found." });
 });

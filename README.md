@@ -86,6 +86,7 @@ I appreciate your understanding and cooperation in making the QuoteSlate API a v
 -   📝 **Detailed Error Messages**: Clear, actionable error responses
 -   🔄 **RESTful Architecture**: Clean, predictable API endpoints
 -   📖 **Open Source**: Fully transparent and community-driven
+-   📘 **OpenAPI Documentation**: Specification available at `/api/openapi.json`
 
 ## Getting Started
 
@@ -205,6 +206,8 @@ Ensure your JSON files follow these formats:
 ```
 
 ## API Reference
+
+An OpenAPI specification is available at `/api/openapi.json`.
 
 ### Endpoints
 
