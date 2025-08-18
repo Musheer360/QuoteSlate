@@ -11,6 +11,8 @@ A robust, developer-friendly API for serving inspirational and thought-provoking
 
 [Explore the API](https://quoteslate.vercel.app) | [Documentation](https://github.com/Musheer360/QuoteSlate#api-reference) | [Deploy Your Own](https://github.com/Musheer360/QuoteSlate#deploying-on-vercel-easiest-for-high-volume-needs)
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Musheer360/QuoteSlate)
+
 </div>
 
 ## 📚 Table of Contents
