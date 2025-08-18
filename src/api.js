@@ -26,18 +26,21 @@ app.use((req, res, next) => {
 });
 
 // Configure rate limiting for abuse protection
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15-minute window
-  max: 100, // Maximum requests per IP for the time window
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    error: "Too many requests, please try again later.",
-  },
-});
+const enableRateLimit = process.env.ENABLE_RATE_LIMIT !== "false";
+if (enableRateLimit) {
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15-minute window
+    max: 100, // Maximum requests per IP for the time window
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+      error: "Too many requests, please try again later.",
+    },
+  });
 
-// Enforce rate limits on API routes
-app.use("/api/", apiLimiter);
+  // Enforce rate limits on API routes
+  app.use("/api/", apiLimiter);
+}
 
 // Load quote data at startup
 const quotesData = JSON.parse(

@@ -392,6 +392,7 @@ Response format:
 -   **Scope**: Per IP address
 -   **Headers**: Standard rate limit headers included in responses
 -   **Recovery**: Limits reset automatically after the 15-minute window
+-   **Configuration**: Set `ENABLE_RATE_LIMIT=false` to disable rate limiting (useful for testing). Unset or `true` keeps it enabled.
 -   **Important:** Exceeding the rate limit will result in a `429 Too Many Requests` error. To avoid this, utilize the `count` parameter to fetch multiple quotes in a single request and cache the results locally. If you require high-volume access, please fork the repository and deploy your own instance.
 
 ## Technical Details
@@ -433,15 +434,13 @@ QuoteSlate includes a comprehensive test suite to ensure API reliability and sec
 
 ### Running Tests
 
-1. **Start the server:**
-   ```bash
-   npm start
-   ```
+Run the test suite directly:
 
-2. **Run tests (in a separate terminal):**
-   ```bash
-   npm test
-   ```
+```bash
+npm test
+```
+
+The tests automatically start a server instance with rate limiting disabled, execute all checks, and then verify rate limiting behavior with the limiter enabled.
 
 ### Test Coverage
 
