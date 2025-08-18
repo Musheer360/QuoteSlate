@@ -1,0 +1,118 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "QuoteSlate API",
+    "version": "1.0.0",
+    "description": "API for fetching inspirational quotes."
+  },
+  "servers": [
+    { "url": "https://quoteslate.vercel.app" }
+  ],
+  "paths": {
+    "/api/quotes/random": {
+      "get": {
+        "summary": "Retrieve random quotes",
+        "parameters": [
+          {
+            "name": "maxLength",
+            "in": "query",
+            "schema": { "type": "integer", "minimum": 1 },
+            "description": "Upper bound on the quote length"
+          },
+          {
+            "name": "minLength",
+            "in": "query",
+            "schema": { "type": "integer", "minimum": 1 },
+            "description": "Lower bound on the quote length"
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Comma-separated list of tags to filter by"
+          },
+          {
+            "name": "authors",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Comma-separated list of authors to filter by"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 50 },
+            "description": "Number of quotes to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A single quote or an array of quotes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    { "$ref": "#/components/schemas/Quote" },
+                    { "type": "array", "items": { "$ref": "#/components/schemas/Quote" } }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid request parameters" },
+          "404": { "description": "No matching quotes found" },
+          "429": { "description": "Too many requests" }
+        }
+      }
+    },
+    "/api/authors": {
+      "get": {
+        "summary": "List available authors",
+        "responses": {
+          "200": {
+            "description": "An object mapping authors to their quote counts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": { "type": "integer" }
+                }
+              }
+            }
+          },
+          "405": { "description": "Method not allowed" }
+        }
+      }
+    },
+    "/api/tags": {
+      "get": {
+        "summary": "List available tags",
+        "responses": {
+          "200": {
+            "description": "An array of tags",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          },
+          "405": { "description": "Method not allowed" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Quote": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "quote": { "type": "string" },
+          "author": { "type": "string" },
+          "length": { "type": "integer" },
+          "tags": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["id", "quote", "author", "length", "tags"]
+      }
+    }
+  }
+}

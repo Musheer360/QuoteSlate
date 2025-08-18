@@ -252,6 +252,11 @@
                 </p>
             </div>
 
+            <div class="card">
+                <h2>OpenAPI Specification</h2>
+                <p><a href="/api/openapi.json">Download the OpenAPI document</a></p>
+            </div>
+
             <div class="card warning-card">
                 <h2 class="warning-title">⚠️ Responsible Use Guidelines</h2>
                 <div class="warning-section">
@@ -570,27 +575,27 @@
 
                         let params = new URLSearchParams();
 
-                        // Handle count parameter
+                        // Append the count parameter when provided
                         const countInput =
                             container.querySelector(".count-input");
                         if (countInput && countInput.value.trim()) {
                             params.append("count", countInput.value.trim());
                         }
 
-                        // Handle tag parameter
+                        // Append the tags parameter when provided
                         const tagInput = container.querySelector(".tag-input");
                         if (tagInput && tagInput.value.trim()) {
                             params.append("tags", tagInput.value.trim());
                         }
 
-                        // Handle author parameter
+                        // Append the authors parameter when provided
                         const authorInput =
                             container.querySelector(".author-input");
                         if (authorInput && authorInput.value.trim()) {
                             params.append("authors", authorInput.value.trim());
                         }
 
-                        // Handle length parameters - simplified logic matching the range section
+                        // Append length parameters, mirroring the range input behavior
                         const lengthInputs = container.querySelectorAll(
                             ".param-input:not(.count-input)",
                         );
