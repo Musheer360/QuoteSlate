@@ -3,99 +3,352 @@
   "info": {
     "title": "QuoteSlate API",
     "version": "1.0.0",
-    "description": "API for fetching inspirational quotes."
+    "description": "A robust, developer-friendly API for serving inspirational and thought-provoking quotes with powerful filtering capabilities. Access 2,600+ curated quotes from various authors and categories.",
+    "contact": {
+      "name": "Musheer360",
+      "url": "https://github.com/Musheer360/QuoteSlate"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/Musheer360/QuoteSlate/blob/main/LICENSE"
+    }
   },
   "servers": [
-    { "url": "https://quoteslate.vercel.app" }
+    {
+      "url": "https://quoteslate.vercel.app",
+      "description": "Production server"
+    },
+    {
+      "url": "http://localhost:3000",
+      "description": "Local development server"
+    }
   ],
   "paths": {
     "/api/quotes/random": {
       "get": {
         "summary": "Retrieve random quotes",
+        "description": "Fetch one or more random quotes with optional filtering by author, tags, and length. All parameters are optional and can be combined.",
+        "operationId": "getRandomQuotes",
+        "tags": ["Quotes"],
         "parameters": [
           {
-            "name": "maxLength",
+            "name": "count",
             "in": "query",
-            "schema": { "type": "integer", "minimum": 1 },
-            "description": "Upper bound on the quote length"
-          },
-          {
-            "name": "minLength",
-            "in": "query",
-            "schema": { "type": "integer", "minimum": 1 },
-            "description": "Lower bound on the quote length"
-          },
-          {
-            "name": "tags",
-            "in": "query",
-            "schema": { "type": "string" },
-            "description": "Comma-separated list of tags to filter by"
+            "description": "Number of quotes to return (1-50)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 1
+            },
+            "example": 5
           },
           {
             "name": "authors",
             "in": "query",
-            "schema": { "type": "string" },
-            "description": "Comma-separated list of authors to filter by"
+            "description": "Comma-separated list of author names (case-insensitive, max 20)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Babe Ruth,Maya Angelou"
           },
           {
-            "name": "count",
+            "name": "tags",
             "in": "query",
-            "schema": { "type": "integer", "minimum": 1, "maximum": 50 },
-            "description": "Number of quotes to return"
+            "description": "Comma-separated list of tags (case-insensitive, max 20)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "motivation,wisdom"
+          },
+          {
+            "name": "minLength",
+            "in": "query",
+            "description": "Minimum character length of quotes",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "example": 50
+          },
+          {
+            "name": "maxLength",
+            "in": "query",
+            "description": "Maximum character length of quotes",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "example": 150
           }
         ],
         "responses": {
           "200": {
-            "description": "A single quote or an array of quotes",
+            "description": "Successful response - returns a single quote object when count=1, or an array of quote objects when count>1",
             "content": {
               "application/json": {
                 "schema": {
                   "oneOf": [
-                    { "$ref": "#/components/schemas/Quote" },
-                    { "type": "array", "items": { "$ref": "#/components/schemas/Quote" } }
+                    {
+                      "$ref": "#/components/schemas/Quote"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Quote"
+                      }
+                    }
                   ]
+                },
+                "examples": {
+                  "singleQuote": {
+                    "summary": "Single quote response",
+                    "value": {
+                      "id": 498,
+                      "quote": "Every strike brings me closer to the next home run.",
+                      "author": "Babe Ruth",
+                      "length": 51,
+                      "tags": ["wisdom"]
+                    }
+                  },
+                  "multipleQuotes": {
+                    "summary": "Multiple quotes response",
+                    "value": [
+                      {
+                        "id": 498,
+                        "quote": "Every strike brings me closer to the next home run.",
+                        "author": "Babe Ruth",
+                        "length": 51,
+                        "tags": ["wisdom"]
+                      },
+                      {
+                        "id": 120,
+                        "quote": "All great achievements require time.",
+                        "author": "Maya Angelou",
+                        "length": 36,
+                        "tags": ["motivation"]
+                      }
+                    ]
+                  }
                 }
               }
             }
           },
-          "400": { "description": "Invalid request parameters" },
-          "404": { "description": "No matching quotes found" },
-          "429": { "description": "Too many requests" }
+          "400": {
+            "description": "Bad request - invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalidAuthor": {
+                    "summary": "Invalid author name",
+                    "value": {
+                      "error": "Invalid author(s): Unknown Author"
+                    }
+                  },
+                  "invalidTag": {
+                    "summary": "Invalid tag",
+                    "value": {
+                      "error": "Invalid tag(s): invalid1, invalid2"
+                    }
+                  },
+                  "countOutOfRange": {
+                    "summary": "Count out of range",
+                    "value": {
+                      "error": "count must be less than or equal to 50."
+                    }
+                  },
+                  "tooManyTags": {
+                    "summary": "Too many tags",
+                    "value": {
+                      "error": "Maximum 20 tags allowed."
+                    }
+                  },
+                  "lengthMismatch": {
+                    "summary": "minLength > maxLength",
+                    "value": {
+                      "error": "minLength must be less than or equal to maxLength."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No quotes found matching the criteria",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "No quotes found matching the criteria."
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not allowed - only GET requests are supported",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Method POST not allowed for this endpoint."
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded - too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Too many requests, please try again later."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Internal server error."
+                }
+              }
+            }
+          }
         }
       }
     },
     "/api/authors": {
       "get": {
         "summary": "List available authors",
+        "description": "Retrieve a complete list of all authors in the database along with their quote counts",
+        "operationId": "getAuthors",
+        "tags": ["Metadata"],
         "responses": {
           "200": {
-            "description": "An object mapping authors to their quote counts",
+            "description": "Successful response - returns an object mapping author names to their quote counts",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": { "type": "integer" }
+                  "additionalProperties": {
+                    "type": "integer"
+                  }
+                },
+                "example": {
+                  "Avery Brooks": 1,
+                  "Ayn Rand": 3,
+                  "Babe Ruth": 4,
+                  "Maya Angelou": 7
                 }
               }
             }
           },
-          "405": { "description": "Method not allowed" }
+          "405": {
+            "description": "Method not allowed - only GET requests are supported",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Method POST not allowed for this endpoint."
+                }
+              }
+            }
+          }
         }
       }
     },
     "/api/tags": {
       "get": {
         "summary": "List available tags",
+        "description": "Retrieve a complete list of all tags available for filtering quotes",
+        "operationId": "getTags",
+        "tags": ["Metadata"],
         "responses": {
           "200": {
-            "description": "An array of tags",
+            "description": "Successful response - returns an array of tag strings",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "type": "string" } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "example": [
+                  "motivation",
+                  "inspiration",
+                  "life",
+                  "wisdom",
+                  "love",
+                  "success"
+                ]
               }
             }
           },
-          "405": { "description": "Method not allowed" }
+          "405": {
+            "description": "Method not allowed - only GET requests are supported",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Method POST not allowed for this endpoint."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/openapi.json": {
+      "get": {
+        "summary": "Get OpenAPI specification",
+        "description": "Retrieve the OpenAPI 3.0 specification for this API",
+        "operationId": "getOpenAPISpec",
+        "tags": ["Documentation"],
+        "responses": {
+          "200": {
+            "description": "OpenAPI specification document",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not allowed - only GET requests are supported",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -104,15 +357,65 @@
     "schemas": {
       "Quote": {
         "type": "object",
+        "description": "A quote object containing the quote text, author, and metadata",
+        "required": ["id", "quote", "author", "length", "tags"],
         "properties": {
-          "id": { "type": "integer" },
-          "quote": { "type": "string" },
-          "author": { "type": "string" },
-          "length": { "type": "integer" },
-          "tags": { "type": "array", "items": { "type": "string" } }
-        },
-        "required": ["id", "quote", "author", "length", "tags"]
+          "id": {
+            "type": "integer",
+            "description": "Unique identifier for the quote",
+            "example": 498
+          },
+          "quote": {
+            "type": "string",
+            "description": "The quote text",
+            "example": "Every strike brings me closer to the next home run."
+          },
+          "author": {
+            "type": "string",
+            "description": "The author of the quote",
+            "example": "Babe Ruth"
+          },
+          "length": {
+            "type": "integer",
+            "description": "Character length of the quote",
+            "example": 51
+          },
+          "tags": {
+            "type": "array",
+            "description": "Array of tags associated with the quote",
+            "items": {
+              "type": "string"
+            },
+            "example": ["wisdom", "motivation"]
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "description": "Error response object",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message describing what went wrong",
+            "example": "Invalid author(s): Unknown Author"
+          }
+        }
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "Quotes",
+      "description": "Operations for retrieving quotes"
+    },
+    {
+      "name": "Metadata",
+      "description": "Operations for retrieving metadata (authors, tags)"
+    },
+    {
+      "name": "Documentation",
+      "description": "API documentation endpoints"
+    }
+  ]
 }

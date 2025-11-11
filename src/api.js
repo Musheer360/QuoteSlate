@@ -11,17 +11,17 @@ app.set("trust proxy", 1);
 // Enable CORS for every route
 app.use(cors());
 
+// Log each request along with the resolved client IP
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] Request from IP: ${req.ip}`);
+  next();
+});
+
 // Add a few protective headers to each response
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
-  next();
-});
-
-// Log each request along with the resolved client IP
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] Request from IP: ${req.ip}`);
   next();
 });
 
@@ -126,7 +126,8 @@ function getQuotes({
   count = 1,
   authors = null,
 } = {}) {
-  let validQuotes = [...quotesData];
+  // FIX #5: Don't copy array, just reference it
+  let validQuotes = quotesData;
 
   // Apply author filtering when specified
   if (authors) {
@@ -157,17 +158,14 @@ function getQuotes({
   // Ensure count doesn't exceed number of available quotes
   count = Math.min(count, validQuotes.length);
 
-  // Randomly pick quotes without repeating
-  const quotes = [];
-  const tempQuotes = [...validQuotes];
-
-  for (let i = 0; i < count; i++) {
-    const randomIndex = Math.floor(Math.random() * tempQuotes.length);
-    quotes.push(tempQuotes[randomIndex]);
-    tempQuotes.splice(randomIndex, 1);
+  // FIX #4: Use Fisher-Yates shuffle instead of splice in loop
+  const shuffled = [...validQuotes];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
 
-  return quotes;
+  return shuffled.slice(0, count);
 }
 
 // Endpoint that lists authors and their quote totals
@@ -229,6 +227,15 @@ app.get("/api/quotes/random", (req, res) => {
 
   const authorsParam = validateStringParam(req.query.authors, 'authors');
   const authors = authorsParam ? authorsParam.split(",").map((author) => author.trim()).filter(Boolean) : null;
+
+  // FIX #3: Add input length limits
+  if (tags && tags.length > 20) {
+    return res.status(400).json({ error: "Maximum 20 tags allowed." });
+  }
+
+  if (authors && authors.length > 20) {
+    return res.status(400).json({ error: "Maximum 20 authors allowed." });
+  }
 
   // If authors are supplied, ensure each one is recognized
   if (authors) {
