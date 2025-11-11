@@ -11,9 +11,11 @@ app.set("trust proxy", 1);
 // Enable CORS for every route
 app.use(cors());
 
-// Log each request along with the resolved client IP
+// Log each request along with the resolved client IP (skip favicon)
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] Request from IP: ${req.ip}`);
+  if (req.path !== '/favicon.ico') {
+    console.log(`[${new Date().toISOString()}] Request from IP: ${req.ip}`);
+  }
   next();
 });
 
