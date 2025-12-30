@@ -106,9 +106,9 @@ function validateStringParam(value, paramName) {
 
 // Check if a quote's author matches any requested name
 // requestedAuthors should be a Set of pre-normalized author names
-function hasMatchingAuthor(quote, requestedAuthorsSet, normalizedAuthorCache) {
+function hasMatchingAuthor(quote, requestedAuthorsSet) {
   if (!requestedAuthorsSet) return true;
-  const quoteAuthor = normalizedAuthorCache || normalizeAuthorName(quote.author);
+  const quoteAuthor = normalizeAuthorName(quote.author);
   return requestedAuthorsSet.has(quoteAuthor);
 }
 
@@ -141,7 +141,10 @@ function getQuotes({
   const validQuotes = quotesData.filter((quote) => {
     // Apply author filtering using pre-computed normalized names
     if (authorsSet) {
-      const normalizedAuthor = normalizedQuoteAuthors.get(quote.id);
+      // Use cached normalized author if available, otherwise compute it
+      const normalizedAuthor = quote.id && normalizedQuoteAuthors.has(quote.id)
+        ? normalizedQuoteAuthors.get(quote.id)
+        : normalizeAuthorName(quote.author);
       if (!authorsSet.has(normalizedAuthor)) {
         return false;
       }
