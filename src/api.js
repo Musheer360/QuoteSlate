@@ -104,14 +104,6 @@ function validateStringParam(value, paramName) {
   return value.trim();
 }
 
-// Check if a quote's author matches any requested name
-// requestedAuthors should be a Set of pre-normalized author names
-function hasMatchingAuthor(quote, requestedAuthorsSet) {
-  if (!requestedAuthorsSet) return true;
-  const quoteAuthor = normalizeAuthorName(quote.author);
-  return requestedAuthorsSet.has(quoteAuthor);
-}
-
 // Verify that a quote includes all required tags
 // requestedTags should be an array
 function hasMatchingTags(quote, requestedTags) {
@@ -123,7 +115,9 @@ function hasMatchingTags(quote, requestedTags) {
 // Pre-compute normalized author names for all quotes for faster filtering
 const normalizedQuoteAuthors = new Map();
 quotesData.forEach((quote) => {
-  normalizedQuoteAuthors.set(quote.id, normalizeAuthorName(quote.author));
+  if (quote.id !== undefined && quote.id !== null) {
+    normalizedQuoteAuthors.set(quote.id, normalizeAuthorName(quote.author));
+  }
 });
 
 // Return quotes that satisfy the provided filters
@@ -139,12 +133,9 @@ function getQuotes({
 
   // Apply all filters in a single pass for better performance
   const validQuotes = quotesData.filter((quote) => {
-    // Apply author filtering using pre-computed normalized names
+    // Apply author filtering using pre-computed normalized names with fallback
     if (authorsSet) {
-      // Use cached normalized author if available, otherwise compute it
-      const normalizedAuthor = quote.id && normalizedQuoteAuthors.has(quote.id)
-        ? normalizedQuoteAuthors.get(quote.id)
-        : normalizeAuthorName(quote.author);
+      const normalizedAuthor = normalizedQuoteAuthors.get(quote.id) || normalizeAuthorName(quote.author);
       if (!authorsSet.has(normalizedAuthor)) {
         return false;
       }
