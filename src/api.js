@@ -105,20 +105,26 @@ function validateStringParam(value, paramName) {
 }
 
 // Check if a quote's author matches any requested name
-function hasMatchingAuthor(quote, requestedAuthors) {
-  if (!requestedAuthors) return true;
-  const quoteAuthor = normalizeAuthorName(quote.author);
-  return requestedAuthors.some(
-    (author) => normalizeAuthorName(author) === quoteAuthor,
-  );
+// requestedAuthors should be a Set of pre-normalized author names
+function hasMatchingAuthor(quote, requestedAuthorsSet, normalizedAuthorCache) {
+  if (!requestedAuthorsSet) return true;
+  const quoteAuthor = normalizedAuthorCache || normalizeAuthorName(quote.author);
+  return requestedAuthorsSet.has(quoteAuthor);
 }
 
 // Verify that a quote includes all required tags
+// requestedTags should be an array
 function hasMatchingTags(quote, requestedTags) {
   if (!requestedTags) return true;
-  const quoteTags = new Set(quote.tags);
-  return requestedTags.every((tag) => quoteTags.has(tag));
+  // Check if quote has all requested tags
+  return requestedTags.every((tag) => quote.tags.includes(tag));
 }
+
+// Pre-compute normalized author names for all quotes for faster filtering
+const normalizedQuoteAuthors = new Map();
+quotesData.forEach((quote) => {
+  normalizedQuoteAuthors.set(quote.id, normalizeAuthorName(quote.author));
+});
 
 // Return quotes that satisfy the provided filters
 function getQuotes({
@@ -128,29 +134,35 @@ function getQuotes({
   count = 1,
   authors = null,
 } = {}) {
-  // FIX #5: Don't copy array, just reference it
-  let validQuotes = quotesData;
+  // Pre-process authors into a Set for O(1) lookups
+  const authorsSet = authors ? new Set(authors.map(normalizeAuthorName)) : null;
 
-  // Apply author filtering when specified
-  if (authors) {
-    validQuotes = validQuotes.filter((quote) =>
-      hasMatchingAuthor(quote, authors),
-    );
-  }
+  // Apply all filters in a single pass for better performance
+  const validQuotes = quotesData.filter((quote) => {
+    // Apply author filtering using pre-computed normalized names
+    if (authorsSet) {
+      const normalizedAuthor = normalizedQuoteAuthors.get(quote.id);
+      if (!authorsSet.has(normalizedAuthor)) {
+        return false;
+      }
+    }
 
-  // Apply tag filtering if tags are supplied
-  if (tags) {
-    validQuotes = validQuotes.filter((quote) => hasMatchingTags(quote, tags));
-  }
+    // Apply tag filtering
+    if (tags && !hasMatchingTags(quote, tags)) {
+      return false;
+    }
 
-  // Enforce min and max length constraints
-  if (minLength !== null) {
-    validQuotes = validQuotes.filter((quote) => quote.length >= minLength);
-  }
+    // Apply length constraints
+    if (minLength !== null && quote.length < minLength) {
+      return false;
+    }
 
-  if (maxLength !== null) {
-    validQuotes = validQuotes.filter((quote) => quote.length <= maxLength);
-  }
+    if (maxLength !== null && quote.length > maxLength) {
+      return false;
+    }
+
+    return true;
+  });
 
   // Bail out if filtering removed all quotes
   if (validQuotes.length === 0) {
