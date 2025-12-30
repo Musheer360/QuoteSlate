@@ -115,7 +115,7 @@ function hasMatchingTags(quote, requestedTags) {
 // Pre-compute normalized author names for all quotes for faster filtering
 const normalizedQuoteAuthors = new Map();
 quotesData.forEach((quote) => {
-  if (quote.id !== undefined && quote.id !== null) {
+  if (quote.id != null) {
     normalizedQuoteAuthors.set(quote.id, normalizeAuthorName(quote.author));
   }
 });
